@@ -167,6 +167,36 @@ function save_uploaded_photo(array $file): string
     return 'uploads/photos/' . $filename;
 }
 
+function current_base_url(): string
+{
+    $isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+        || ($_SERVER['SERVER_PORT'] ?? null) === '443';
+    $scheme = $isHttps ? 'https' : 'http';
+    $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+    return $scheme . '://' . $host;
+}
+
+/**
+ * Envia o e-mail de recuperação de senha via mail() nativo do PHP — funciona
+ * out-of-the-box na maioria dos planos cPanel (Locaweb inclusa), sem precisar
+ * de credenciais de SMTP externo. Falha silenciosamente (não lança exceção):
+ * quem chama nunca deve revelar ao usuário se o envio funcionou ou não.
+ */
+function send_password_reset_email(string $toEmail, string $displayName, string $resetUrl): void
+{
+    $subject = 'Redefinir sua senha — Reserva';
+    $body = "Olá, {$displayName}.\n\n"
+        . "Pediram a redefinição da senha da sua conta no Reserva. Se foi você, "
+        . "clique no link abaixo (válido por " . PASSWORD_RESET_TTL_MINUTES . " minutos):\n\n"
+        . $resetUrl . "\n\n"
+        . "Se você não pediu isso, pode ignorar este e-mail — sua senha continua a mesma.\n";
+
+    $headers = "From: Reserva <no-reply@" . preg_replace('/^www\./', '', $_SERVER['HTTP_HOST'] ?? 'localhost') . ">\r\n"
+        . "Content-Type: text/plain; charset=utf-8";
+
+    @mail($toEmail, $subject, $body, $headers);
+}
+
 const PROFILE_TYPE_LABEL = [
     'COUPLE' => 'Casal',
     'SINGLE_WOMAN' => 'Solteira',

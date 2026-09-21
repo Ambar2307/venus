@@ -63,6 +63,12 @@ templates/                                      → cabeçalho/rodapé HTML reap
   próprio usuário na página de Perfil — apaga o registro no banco (perfil,
   fotos, curtidas, comentários, amizades, conversas, em cascata) e também os
   arquivos de foto do disco, exigindo a senha atual como confirmação.
+- **Recuperação de senha** (`esqueci-senha.php`, `redefinir-senha.php`):
+  gera um token de uso único (guardado como hash SHA-256, nunca em texto
+  puro), válido por 60 minutos, e envia por e-mail via `mail()` nativo do
+  PHP — funciona nos planos cPanel comuns sem precisar configurar SMTP
+  externo. A tela de pedido sempre mostra a mesma mensagem, exista ou não
+  o e-mail, pra não revelar quais contas existem.
 
 Toda foto enviada também passa por `app/helpers.php::reencode_photo_stripping_metadata()`:
 via GD, é redimensionada (máx. 1600px no lado maior) e regravada — o que
@@ -89,6 +95,11 @@ sem reprocessar (a app não quebra, só perde essa otimização).
   Stripe): a página `planos.php` já mostra a comparação Livre × Exclusivo,
   falta ligar o botão "Assinar" a um checkout de verdade que, via webhook,
   atualize `users.plan` e `users.plan_valid_until`.
+- **Entregabilidade de e-mail**: `mail()` funciona sem configuração extra
+  na maioria dos cPanel, mas é comum cair em spam se o domínio não tiver
+  SPF/DKIM configurados (normalmente em "E-mail" → "Autenticação de
+  e-mail" no cPanel da Locaweb). Vale testar o link de "esqueci minha
+  senha" com um e-mail de verdade assim que o domínio estiver no ar.
 
 ## Como publicar na Locaweb (hospedagem compartilhada / cPanel)
 

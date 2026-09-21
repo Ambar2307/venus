@@ -201,3 +201,72 @@ function require_admin_api(): array
     }
     return $user;
 }
+
+const PASSWORD_RESET_TTL_MINUTES = 60;
+
+/**
+ * Se o e-mail existir, gera um token de recuperação e envia por e-mail.
+ * Sempre silencioso (sem lançar erro) se o e-mail não existir — quem chama
+ * deve mostrar a mesma mensagem genérica nos dois casos, pra não revelar
+ * quais e-mails têm conta cadastrada.
+ */
+function request_password_reset(string $email): void
+{
+    $stmt = db()->prepare(
+        'SELECT u.id, u.email, p.display_name FROM users u
+         JOIN profiles p ON p.user_id = u.id
+         WHERE u.email = ? AND u.status = "active"'
+    );
+    $stmt->execute([$email]);
+    $user = $stmt->fetch();
+    if (!$user) {
+        return;
+    }
+
+    $token = bin2hex(random_bytes(32));
+    $tokenHash = hash('sha256', $token);
+    $expiresAt = date('Y-m-d H:i:s', time() + PASSWORD_RESET_TTL_MINUTES * 60);
+
+    $stmt = db()->prepare(
+        'INSERT INTO password_resets (id, user_id, token_hash, expires_at) VALUES (?, ?, ?, ?)'
+    );
+    $stmt->execute([gen_uuid(), $user['id'], $tokenHash, $expiresAt]);
+
+    $resetUrl = current_base_url() . '/redefinir-senha.php?token=' . $token;
+    send_password_reset_email($user['email'], $user['display_name'], $resetUrl);
+}
+
+/** Retorna a linha de password_resets + o usuário associado, se o token for válido. */
+function validate_reset_token(string $token): ?array
+{
+    if ($token === '') {
+        return null;
+    }
+    $tokenHash = hash('sha256', $token);
+
+    $stmt = db()->prepare(
+        'SELECT pr.*, u.email FROM password_resets pr
+         JOIN users u ON u.id = pr.user_id
+         WHERE pr.token_hash = ? AND pr.used_at IS NULL AND pr.expires_at > NOW()'
+    );
+    $stmt->execute([$tokenHash]);
+    $row = $stmt->fetch();
+    return $row ?: null;
+}
+
+/** Define a nova senha e invalida todos os tokens pendentes desse usuário. */
+function consume_reset_token(string $resetId, string $userId, string $newPassword): void
+{
+    $pdo = db();
+    $pdo->beginTransaction();
+    try {
+        $pdo->prepare('UPDATE users SET password_hash = ? WHERE id = ?')
+            ->execute([password_hash($newPassword, PASSWORD_DEFAULT), $userId]);
+        $pdo->prepare('UPDATE password_resets SET used_at = NOW() WHERE user_id = ? AND used_at IS NULL')
+            ->execute([$userId]);
+        $pdo->commit();
+    } catch (Throwable $e) {
+        $pdo->rollBack();
+        throw new RuntimeException('Não foi possível redefinir a senha. Tente novamente.');
+    }
+}

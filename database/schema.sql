@@ -91,6 +91,19 @@ CREATE TABLE IF NOT EXISTS conversations (
   FOREIGN KEY (part_b_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- Recuperação de senha: token_hash guarda o SHA-256 do token (nunca o token
+-- em texto puro), assim um vazamento do banco não permite redefinir senhas.
+CREATE TABLE IF NOT EXISTS password_resets (
+  id CHAR(36) PRIMARY KEY,
+  user_id CHAR(36) NOT NULL,
+  token_hash CHAR(64) NOT NULL,
+  expires_at DATETIME NOT NULL,
+  used_at DATETIME NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  INDEX idx_password_resets_token (token_hash)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 -- Denúncia de foto: reported_user_id é sempre o dono da foto, preenchido
 -- pelo servidor a partir de photos.user_id — nunca confiar nisso vindo do cliente.
 CREATE TABLE IF NOT EXISTS reports (

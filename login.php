@@ -42,6 +42,9 @@ require __DIR__ . '/templates/header.php';
 </form>
 
 <p class="text-sm text-muted" style="max-width:360px;margin-top:1rem">
+  <a href="/esqueci-senha.php" class="text-gold">Esqueci minha senha</a>
+</p>
+<p class="text-sm text-muted" style="max-width:360px;margin-top:.25rem">
   Ainda não tem perfil? <a href="/signup.php" class="text-gold">Criar agora</a>
 </p>
 
