@@ -73,6 +73,10 @@
             div.appendChild(document.createTextNode(res.texto));
             list.appendChild(div);
           }
+          var countEl = article ? article.querySelector("[data-comment-count]") : null;
+          if (countEl) {
+            countEl.textContent = String(parseInt(countEl.textContent, 10) + 1);
+          }
           input.value = "";
         })
         .catch(handleError);

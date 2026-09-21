@@ -72,11 +72,13 @@ require __DIR__ . '/templates/header.php';
     <?php $tipo = PROFILE_TYPE_LABEL[$foto['type']] ?? ''; ?>
     <article class="card" data-photo-id="<?= e($foto['id']) ?>">
       <div class="photo-header">
-        <div class="avatar"></div>
-        <div>
-          <div class="text-sm" style="font-weight:600"><?= e($foto['display_name']) ?></div>
-          <div class="text-xs text-muted"><?= e($tipo) ?></div>
-        </div>
+        <a href="/perfil.php?id=<?= e($foto['user_id']) ?>" style="display:contents">
+          <div class="avatar"></div>
+          <div>
+            <div class="text-sm" style="font-weight:600"><?= e($foto['display_name']) ?></div>
+            <div class="text-xs text-muted"><?= e($tipo) ?></div>
+          </div>
+        </a>
         <?php if ($foto['visibility'] === 'FRIENDS'): ?>
           <span class="badge badge-gold" style="margin-left:auto">Amigos</span>
         <?php endif; ?>
@@ -102,7 +104,7 @@ require __DIR__ . '/templates/header.php';
             data-photo-id="<?= e($foto['id']) ?>"
             <?= (!$currentUser || $foto['curtido_pelo_viewer']) ? 'disabled' : '' ?>
           >♥ <span data-like-count><?= count($foto['likes']) ?></span></button>
-          <span class="text-xs text-muted"><?= count($foto['comentarios']) ?> comentários</span>
+          <span class="text-xs text-muted"><span data-comment-count><?= count($foto['comentarios']) ?></span> comentários</span>
         </div>
 
         <div class="comment-list" data-comment-list>
