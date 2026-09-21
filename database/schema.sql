@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS users (
   plan_valid_until DATETIME NULL,
   status VARCHAR(20) NOT NULL DEFAULT 'active',
   is_admin TINYINT(1) NOT NULL DEFAULT 0,
+  terms_accepted_at DATETIME NOT NULL,
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -88,6 +89,22 @@ CREATE TABLE IF NOT EXISTS conversations (
   UNIQUE KEY uniq_conversation (part_a_id, part_b_id),
   FOREIGN KEY (part_a_id) REFERENCES users(id) ON DELETE CASCADE,
   FOREIGN KEY (part_b_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Denúncia de foto: reported_user_id é sempre o dono da foto, preenchido
+-- pelo servidor a partir de photos.user_id — nunca confiar nisso vindo do cliente.
+CREATE TABLE IF NOT EXISTS reports (
+  id CHAR(36) PRIMARY KEY,
+  reporter_id CHAR(36) NOT NULL,
+  photo_id CHAR(36) NOT NULL,
+  reported_user_id CHAR(36) NOT NULL,
+  reason VARCHAR(500) NOT NULL,
+  status ENUM('PENDING','REVIEWED') NOT NULL DEFAULT 'PENDING',
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (reporter_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (photo_id) REFERENCES photos(id) ON DELETE CASCADE,
+  FOREIGN KEY (reported_user_id) REFERENCES users(id) ON DELETE CASCADE,
+  INDEX idx_reports_status (status, created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS messages (

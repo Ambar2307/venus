@@ -24,12 +24,63 @@ $stmt = db()->prepare(
 $stmt->execute();
 $recentes = $stmt->fetchAll();
 
+$stmt = db()->prepare(
+    "SELECT r.*, reporterP.display_name AS reporter_name,
+            reportedP.display_name AS reported_name,
+            ph.file_path, ph.moderation_status AS photo_status
+     FROM reports r
+     JOIN profiles reporterP ON reporterP.user_id = r.reporter_id
+     JOIN profiles reportedP ON reportedP.user_id = r.reported_user_id
+     JOIN photos ph ON ph.id = r.photo_id
+     WHERE r.status = 'PENDING'
+     ORDER BY r.created_at ASC"
+);
+$stmt->execute();
+$denuncias = $stmt->fetchAll();
+
 $pageTitle = 'Moderação — Reserva';
 $activePage = 'moderacao';
 require __DIR__ . '/../templates/header.php';
 ?>
 
 <h1 class="font-serif">Moderação de fotos</h1>
+
+<h3 class="text-sm">Denúncias pendentes (<?= count($denuncias) ?>)</h3>
+<div class="stack" style="margin-bottom:2.5rem" data-reports-list>
+  <?php foreach ($denuncias as $rep): ?>
+    <article class="card" data-report-row="<?= e($rep['id']) ?>">
+      <div class="photo-header">
+        <div class="avatar"></div>
+        <div>
+          <div class="text-sm" style="font-weight:600">Foto de <?= e($rep['reported_name']) ?></div>
+          <div class="text-xs text-muted">
+            Denunciada por <?= e($rep['reporter_name']) ?> em
+            <?= e(date('d/m/Y H:i', strtotime($rep['created_at']))) ?>
+            — status atual: <?= e($rep['photo_status']) ?>
+          </div>
+        </div>
+      </div>
+      <div class="photo-media" style="height:10rem">
+        <img src="/photo.php?id=<?= e($rep['photo_id']) ?>" alt="">
+      </div>
+      <div class="photo-body">
+        <p class="text-sm"><strong>Motivo:</strong> <?= e($rep['reason']) ?></p>
+        <div class="photo-actions">
+          <button class="btn btn-ghost btn-sm" data-report-resolve-btn data-report-id="<?= e($rep['id']) ?>" data-action="dismiss">
+            Descartar denúncia
+          </button>
+          <button class="btn btn-sm" data-report-resolve-btn data-report-id="<?= e($rep['id']) ?>" data-action="remove_photo">
+            Remover foto
+          </button>
+        </div>
+      </div>
+    </article>
+  <?php endforeach; ?>
+  <?php if (!$denuncias): ?>
+    <p class="text-sm text-muted">Nenhuma denúncia pendente.</p>
+  <?php endif; ?>
+</div>
+
 <p class="text-sm text-muted" style="margin-bottom:1.5rem">
   <span data-pending-count><?= count($pendentes) ?></span> foto(s) aguardando aprovação.
 </p>

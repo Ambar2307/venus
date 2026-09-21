@@ -113,4 +113,21 @@ require __DIR__ . '/templates/header.php';
   <?php if (!$fotosReservadas): ?><p class="text-sm text-muted">Nenhuma foto reservada.</p><?php endif; ?>
 </div>
 
+<?php if ($isOwnProfile): ?>
+  <div class="card" style="padding:1.5rem;margin-top:2.5rem;border-color:#5a2733">
+    <h3 class="text-sm text-wine" style="margin-bottom:.5rem">Excluir conta</h3>
+    <p class="text-xs text-muted" style="margin-bottom:1rem">
+      Remove permanentemente seu perfil, fotos, comentários, curtidas, amizades e
+      conversas. Não pode ser desfeito. Veja mais na
+      <a href="/privacidade.php" class="text-gold">Política de Privacidade</a>.
+    </p>
+    <form data-delete-account-form style="display:flex;gap:.5rem;flex-wrap:wrap">
+      <input class="input" type="password" name="password" placeholder="Confirme sua senha" required style="max-width:220px">
+      <button type="submit" class="btn btn-ghost btn-sm" style="border-color:#5a2733;color:#e08a9c">
+        Excluir minha conta
+      </button>
+    </form>
+  </div>
+<?php endif; ?>
+
 <?php require __DIR__ . '/templates/footer.php'; ?>

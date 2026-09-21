@@ -20,6 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'type' => $_POST['type'] ?? '',
                 'interest' => $_POST['interest'] ?? '',
                 'description' => $_POST['description'] ?? '',
+                'terms_accepted' => !empty($_POST['terms_accepted']),
             ]);
             flash('success', 'Perfil criado! Faça login para continuar.');
             redirect('/login.php');
@@ -65,16 +66,21 @@ require __DIR__ . '/templates/header.php';
   <input class="input" name="password" type="password" placeholder="Senha (mín. 8 caracteres)"
          required minlength="8">
 
+  <label class="text-xs text-muted" style="display:flex;gap:.5rem;align-items:flex-start">
+    <input type="checkbox" name="terms_accepted" value="1" required style="margin-top:.2rem"
+           <?= !empty($_POST['terms_accepted']) ? 'checked' : '' ?>>
+    <span>
+      Li e aceito os <a href="/termos.php" target="_blank" class="text-gold">Termos de Uso</a> e a
+      <a href="/privacidade.php" target="_blank" class="text-gold">Política de Privacidade</a>,
+      e confirmo que tenho 18 anos ou mais.
+    </span>
+  </label>
+
   <?php if ($erro): ?>
     <p class="error"><?= e($erro) ?></p>
   <?php endif; ?>
 
   <button class="btn" type="submit">Criar perfil com Acesso Livre</button>
 </form>
-
-<p class="text-xs text-muted" style="max-width:420px;margin-top:1rem">
-  É necessário ter 18 anos ou mais. Ao se cadastrar você concorda com as regras de
-  moderação de conteúdo da plataforma.
-</p>
 
 <?php require __DIR__ . '/templates/footer.php'; ?>

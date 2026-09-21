@@ -48,6 +48,16 @@ templates/                                      → cabeçalho/rodapé HTML reap
   rejeitar cada foto pendente com um clique, com preview da imagem.
   Nenhuma conta é admin por padrão — veja "Promovendo o primeiro
   administrador" abaixo.
+- **Denúncia de fotos** (`api/report.php`): qualquer usuário logado pode
+  denunciar uma foto de outra pessoa direto no feed; a denúncia aparece no
+  painel de moderação, com botões para descartar ou remover a foto
+  denunciada (marcando-a como rejeitada).
+- **LGPD**: cadastro exige aceite explícito de Termos de Uso e Política de
+  Privacidade (`termos.php`, `privacidade.php`), com o horário do aceite
+  gravado (`users.terms_accepted_at`). Toda conta pode ser excluída pelo
+  próprio usuário na página de Perfil — apaga o registro no banco (perfil,
+  fotos, curtidas, comentários, amizades, conversas, em cascata) e também os
+  arquivos de foto do disco, exigindo a senha atual como confirmação.
 
 Toda foto enviada também passa por `app/helpers.php::reencode_photo_stripping_metadata()`:
 via GD, é redimensionada (máx. 1600px no lado maior) e regravada — o que

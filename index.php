@@ -105,6 +105,11 @@ require __DIR__ . '/templates/header.php';
             <?= (!$currentUser || $foto['curtido_pelo_viewer']) ? 'disabled' : '' ?>
           >♥ <span data-like-count><?= count($foto['likes']) ?></span></button>
           <span class="text-xs text-muted"><span data-comment-count><?= count($foto['comentarios']) ?></span> comentários</span>
+          <?php if ($currentUser && $foto['user_id'] !== $currentUser['id']): ?>
+            <button class="btn btn-ghost btn-sm" style="margin-left:auto" data-report-btn data-photo-id="<?= e($foto['id']) ?>">
+              Denunciar
+            </button>
+          <?php endif; ?>
         </div>
 
         <div class="comment-list" data-comment-list>

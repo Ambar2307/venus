@@ -24,7 +24,11 @@ function register_user(array $input): string
     $type = (string)($input['type'] ?? '');
     $interest = trim((string)($input['interest'] ?? ''));
     $description = trim((string)($input['description'] ?? ''));
+    $termsAccepted = !empty($input['terms_accepted']);
 
+    if (!$termsAccepted) {
+        throw new RuntimeException('É preciso aceitar os Termos de Uso e a Política de Privacidade.');
+    }
     if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
         throw new RuntimeException('Informe um e-mail válido.');
     }
@@ -55,8 +59,8 @@ function register_user(array $input): string
     $pdo->beginTransaction();
     try {
         $stmt = $pdo->prepare(
-            'INSERT INTO users (id, email, password_hash, birth_date, plan, status)
-             VALUES (?, ?, ?, ?, "FREE", "active")'
+            'INSERT INTO users (id, email, password_hash, birth_date, plan, status, terms_accepted_at)
+             VALUES (?, ?, ?, ?, "FREE", "active", NOW())'
         );
         $stmt->execute([$userId, $email, $passwordHash, $birthDate]);
 

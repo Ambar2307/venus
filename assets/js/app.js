@@ -96,6 +96,52 @@
     });
   });
 
+  // --- Denunciar foto ---
+  document.querySelectorAll("[data-report-btn]").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var reason = prompt("Por que você está denunciando essa foto?");
+      if (!reason || !reason.trim()) return;
+      var photoId = btn.getAttribute("data-photo-id");
+      postJSON("/api/report.php", { photo_id: photoId, reason: reason.trim() })
+        .then(function () {
+          btn.disabled = true;
+          btn.textContent = "Denunciada";
+        })
+        .catch(handleError);
+    });
+  });
+
+  // --- Excluir conta ---
+  var deleteForm = document.querySelector("[data-delete-account-form]");
+  if (deleteForm) {
+    deleteForm.addEventListener("submit", function (ev) {
+      ev.preventDefault();
+      if (!confirm("Tem certeza? Isso apaga sua conta, fotos e conversas permanentemente.")) {
+        return;
+      }
+      var password = deleteForm.querySelector('input[name="password"]').value;
+      postJSON("/api/account_delete.php", { password: password })
+        .then(function () {
+          window.location.href = "/index.php";
+        })
+        .catch(handleError);
+    });
+  }
+
+  // --- Resolver denúncia (admin) ---
+  document.querySelectorAll("[data-report-resolve-btn]").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var reportId = btn.getAttribute("data-report-id");
+      var action = btn.getAttribute("data-action");
+      postJSON("/api/admin_report_resolve.php", { report_id: reportId, action: action })
+        .then(function () {
+          var row = document.querySelector('[data-report-row="' + reportId + '"]');
+          if (row) row.remove();
+        })
+        .catch(handleError);
+    });
+  });
+
   // --- Moderação de fotos (admin) ---
   document.querySelectorAll("[data-mod-btn]").forEach(function (btn) {
     btn.addEventListener("click", function () {
