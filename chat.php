@@ -48,15 +48,16 @@ if ($withId !== '') {
 <h1 class="font-serif">Chat interno</h1>
 
 <div class="chat-layout">
-  <div class="conversation-list">
+  <div class="conversation-list" data-conversation-list>
     <?php foreach ($conversas as $c): ?>
       <a
         class="conversation-item <?= $c['other_id'] === $withId ? 'active' : '' ?>"
         href="/chat.php?with=<?= e($c['other_id']) ?>"
+        data-conversation-with="<?= e($c['other_id']) ?>"
       ><?= e($c['display_name']) ?></a>
     <?php endforeach; ?>
     <?php if (!$conversas): ?>
-      <p class="text-xs text-muted">
+      <p class="text-xs text-muted" data-no-conversations>
         Nenhuma conversa ainda. Vá em <a href="/amigos.php" class="text-gold">Amigos</a> e comece a conversar
         com alguém pelo perfil da pessoa.
       </p>
@@ -64,7 +65,7 @@ if ($withId !== '') {
   </div>
 
   <?php if ($withId && $outroNome): ?>
-    <div class="chat-window" data-chat-window data-with-id="<?= e($withId) ?>">
+    <div class="chat-window" data-chat-window data-with-id="<?= e($withId) ?>" data-with-name="<?= e($outroNome) ?>">
       <div class="chat-messages" data-chat-messages></div>
       <form class="chat-input-row" data-chat-form>
         <input class="input" type="text" name="text" placeholder="Mensagem para <?= e($outroNome) ?>" maxlength="1000" required>

@@ -258,6 +258,25 @@
       clearInterval(pollInterval);
     });
 
+    function ensureConversationInSidebar() {
+      var list = document.querySelector("[data-conversation-list]");
+      if (!list || list.querySelector('[data-conversation-with="' + withId + '"]')) return;
+
+      var noConv = list.querySelector("[data-no-conversations]");
+      if (noConv) noConv.remove();
+
+      list.querySelectorAll(".conversation-item").forEach(function (el) {
+        el.classList.remove("active");
+      });
+
+      var link = document.createElement("a");
+      link.className = "conversation-item active";
+      link.href = "/chat.php?with=" + encodeURIComponent(withId);
+      link.setAttribute("data-conversation-with", withId);
+      link.textContent = chatWindow.getAttribute("data-with-name") || "Conversa";
+      list.insertBefore(link, list.firstChild);
+    }
+
     if (form) {
       form.addEventListener("submit", function (ev) {
         ev.preventDefault();
@@ -269,6 +288,7 @@
           .then(function () {
             input.value = "";
             loadMessages();
+            ensureConversationInSidebar();
           })
           .catch(handleError);
       });
