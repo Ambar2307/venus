@@ -56,20 +56,24 @@ GD nunca copia esses dados ao regravar a imagem. Se a extensão `gd` não
 estiver disponível no host, o upload cai de volta a salvar o arquivo original
 sem reprocessar (a app não quebra, só perde essa otimização).
 
+- **Fotos nunca são servidas direto pela URL do arquivo.** `uploads/.htaccess`
+  bloqueia qualquer acesso HTTP à pasta (`Require all denied`); toda foto passa
+  por `photo.php?id=...`, que reforça no servidor quem pode ver o quê (dono,
+  admin, ou pública aprovada, ou amigo aceito se for "reservada") antes de ler
+  o arquivo do disco e devolvê-lo. Sem isso, quem descobrisse a URL do arquivo
+  (mesmo com nome aleatório) conseguiria abrir uma foto "só para amigos" direto,
+  pulando a checagem — testado com Apache real (`.htaccess` retorna 403 num
+  acesso direto) e com os quatro casos de visibilidade (dono, admin, amigo,
+  estranho). **Nota**: o servidor embutido do PHP (`php -S`, usado em
+  "Rodando localmente") não lê `.htaccess` — esse bloqueio só é aplicado de
+  fato por um servidor Apache de verdade, como o da Locaweb.
+
 ## O que falta (próximos passos naturais)
 
 - **Cobrança recorrente** (ex.: Mercado Pago, mais comum no Brasil que
   Stripe): a página `planos.php` já mostra a comparação Livre × Exclusivo,
   falta ligar o botão "Assinar" a um checkout de verdade que, via webhook,
   atualize `users.plan` e `users.plan_valid_until`.
-- Nota de segurança: como as fotos ficam em `uploads/photos/` com nome
-  aleatório mas publicamente servidas pelo Apache, uma foto "só amigos"
-  não aparece pra quem não é amigo pela interface — mas quem descobrir a
-  URL exata (nome de arquivo aleatório de 36 caracteres) consegue abrir o
-  arquivo direto. Isso é aceitável pra um MVP, mas se o sigilo das fotos
-  reservadas for crítico, o passo seguinte é servir esses arquivos por um
-  script PHP que reforça a checagem de amizade antes de entregar o arquivo
-  (mais lento, mas sem depender só do nome ser difícil de adivinhar).
 
 ## Como publicar na Locaweb (hospedagem compartilhada / cPanel)
 

@@ -95,7 +95,7 @@ require __DIR__ . '/templates/header.php';
 
 <div data-tab-panel="publicas" class="stack">
   <?php foreach ($fotosPublicas as $foto): ?>
-    <div class="photo-media"><img src="/<?= e($foto['file_path']) ?>" alt=""></div>
+    <div class="photo-media"><img src="/photo.php?id=<?= e($foto['id']) ?>" alt=""></div>
   <?php endforeach; ?>
   <?php if (!$fotosPublicas): ?><p class="text-sm text-muted">Nenhuma foto pública.</p><?php endif; ?>
 </div>
@@ -104,7 +104,7 @@ require __DIR__ . '/templates/header.php';
   <?php foreach ($fotosReservadas as $foto): ?>
     <div class="photo-media">
       <?php if ($amigos): ?>
-        <img src="/<?= e($foto['file_path']) ?>" alt="">
+        <img src="/photo.php?id=<?= e($foto['id']) ?>" alt="">
       <?php else: ?>
         <div class="photo-lock">🔒 Reservada aos amigos</div>
       <?php endif; ?>

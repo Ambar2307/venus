@@ -48,7 +48,7 @@ require __DIR__ . '/../templates/header.php';
         <?php endif; ?>
       </div>
       <div class="photo-media">
-        <img src="/<?= e($foto['file_path']) ?>" alt="">
+        <img src="/photo.php?id=<?= e($foto['id']) ?>" alt="">
       </div>
       <div class="photo-body">
         <?php if ($foto['caption']): ?>

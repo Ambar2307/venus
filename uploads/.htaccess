@@ -1,17 +1,14 @@
-# Pasta de uploads: nunca deve executar código, só servir arquivos estáticos.
-<IfModule mod_php.c>
-  php_flag engine off
+# Bloqueia todo acesso HTTP direto a esta pasta. As fotos só podem ser
+# lidas de dentro do processo PHP (photo.php, que lê o arquivo direto do
+# disco pelo caminho no servidor) — nunca pela URL pública do arquivo.
+# É isso que faz a regra "foto só para amigos" valer de verdade, e não só
+# na interface: sem isso, qualquer um que descobrisse a URL do arquivo
+# (mesmo com nome aleatório) conseguiria abri-la direto, pulando a
+# checagem de amizade.
+<IfModule mod_authz_core.c>
+  Require all denied
 </IfModule>
-<IfModule mod_php7.c>
-  php_flag engine off
+<IfModule !mod_authz_core.c>
+  Order allow,deny
+  Deny from all
 </IfModule>
-
-<FilesMatch "\.(php|phtml|php\d|pl|py|cgi|sh|exe)$">
-  <IfModule mod_authz_core.c>
-    Require all denied
-  </IfModule>
-  <IfModule !mod_authz_core.c>
-    Order allow,deny
-    Deny from all
-  </IfModule>
-</FilesMatch>
