@@ -44,6 +44,9 @@ require __DIR__ . '/../templates/header.php';
 ?>
 
 <h1 class="font-serif">Moderação de fotos</h1>
+<p class="text-xs text-muted" style="margin-bottom:1.5rem">
+  <a href="/admin/usuarios.php" class="text-gold">Ver e suspender usuários →</a>
+</p>
 
 <h3 class="text-sm">Denúncias pendentes (<?= count($denuncias) ?>)</h3>
 <div class="stack" style="margin-bottom:2.5rem" data-reports-list>
@@ -71,6 +74,10 @@ require __DIR__ . '/../templates/header.php';
           </button>
           <button class="btn btn-sm" data-report-resolve-btn data-report-id="<?= e($rep['id']) ?>" data-action="remove_photo">
             Remover foto
+          </button>
+          <button class="btn btn-ghost btn-sm" style="border-color:#5a2733;color:#e08a9c"
+                  data-user-status-btn data-user-id="<?= e($rep['reported_user_id']) ?>" data-status="suspended">
+            Suspender autor
           </button>
         </div>
       </div>

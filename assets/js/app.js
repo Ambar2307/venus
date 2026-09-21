@@ -128,6 +128,41 @@
     });
   }
 
+  // --- Suspender/reativar usuário (admin) ---
+  document.querySelectorAll("[data-user-status-btn]").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var userId = btn.getAttribute("data-user-id");
+      var status = btn.getAttribute("data-status");
+      if (status === "suspended" && !confirm("Suspender esta conta? A pessoa não vai mais conseguir entrar.")) {
+        return;
+      }
+      postJSON("/api/admin_user_status.php", { user_id: userId, status: status })
+        .then(function () {
+          var row = document.querySelector('[data-user-row="' + userId + '"]');
+          if (row) {
+            var label = row.querySelector("[data-user-status-label]");
+            if (label) label.textContent = status === "active" ? "Ativa" : "Suspensa";
+            var actionBtn = row.querySelector("[data-user-status-btn]");
+            if (actionBtn) {
+              if (status === "active") {
+                actionBtn.textContent = "Suspender";
+                actionBtn.setAttribute("data-status", "suspended");
+                actionBtn.className = "btn btn-ghost btn-sm";
+              } else {
+                actionBtn.textContent = "Reativar";
+                actionBtn.setAttribute("data-status", "active");
+                actionBtn.className = "btn btn-sm";
+              }
+            }
+          } else {
+            btn.disabled = true;
+            btn.textContent = "Conta suspensa";
+          }
+        })
+        .catch(handleError);
+    });
+  });
+
   // --- Resolver denúncia (admin) ---
   document.querySelectorAll("[data-report-resolve-btn]").forEach(function (btn) {
     btn.addEventListener("click", function () {

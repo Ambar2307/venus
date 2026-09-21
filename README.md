@@ -50,8 +50,13 @@ templates/                                      → cabeçalho/rodapé HTML reap
   administrador" abaixo.
 - **Denúncia de fotos** (`api/report.php`): qualquer usuário logado pode
   denunciar uma foto de outra pessoa direto no feed; a denúncia aparece no
-  painel de moderação, com botões para descartar ou remover a foto
-  denunciada (marcando-a como rejeitada).
+  painel de moderação, com botões para descartar, remover a foto
+  denunciada (marcando-a como rejeitada) ou suspender direto a conta de
+  quem publicou.
+- **Suspender contas** (`admin/usuarios.php`): admin busca qualquer conta
+  por nome ou e-mail e suspende/reativa com um clique. Conta suspensa não
+  consegue mais logar (mensagem de erro genérica, sem revelar que foi
+  banida). Nenhuma conta consegue suspender a si mesma.
 - **LGPD**: cadastro exige aceite explícito de Termos de Uso e Política de
   Privacidade (`termos.php`, `privacidade.php`), com o horário do aceite
   gravado (`users.terms_accepted_at`). Toda conta pode ser excluída pelo
