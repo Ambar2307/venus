@@ -20,6 +20,10 @@ function register_user(array $input): string
     $email = trim((string)($input['email'] ?? ''));
     $password = (string)($input['password'] ?? '');
     $birthDate = (string)($input['birth_date'] ?? '');
+    $phone = only_digits((string)($input['phone'] ?? ''));
+    $cpf = only_digits((string)($input['cpf'] ?? ''));
+    $city = trim((string)($input['city'] ?? ''));
+    $state = strtoupper(trim((string)($input['state'] ?? '')));
     $displayName = trim((string)($input['display_name'] ?? ''));
     $type = (string)($input['type'] ?? '');
     $interest = trim((string)($input['interest'] ?? ''));
@@ -44,6 +48,18 @@ function register_user(array $input): string
     if ($birthDate === '' || !idade_minima_18($birthDate)) {
         throw new RuntimeException('É necessário ter 18 anos ou mais para se cadastrar.');
     }
+    if (!is_valid_phone($phone)) {
+        throw new RuntimeException('Informe um telefone válido, com DDD.');
+    }
+    if (!is_valid_cpf($cpf)) {
+        throw new RuntimeException('Informe um CPF válido — ele é usado só para confirmar sua idade e não é exibido no seu perfil.');
+    }
+    if ($city === '') {
+        throw new RuntimeException('Informe sua cidade.');
+    }
+    if (!in_array($state, BRAZIL_STATES, true)) {
+        throw new RuntimeException('Selecione um estado (UF) válido.');
+    }
 
     $pdo = db();
 
@@ -53,16 +69,22 @@ function register_user(array $input): string
         throw new RuntimeException('Já existe uma conta com este e-mail.');
     }
 
+    $stmt = $pdo->prepare('SELECT id FROM users WHERE cpf = ?');
+    $stmt->execute([$cpf]);
+    if ($stmt->fetch()) {
+        throw new RuntimeException('Já existe uma conta cadastrada com este CPF.');
+    }
+
     $userId = gen_uuid();
     $passwordHash = password_hash($password, PASSWORD_DEFAULT);
 
     $pdo->beginTransaction();
     try {
         $stmt = $pdo->prepare(
-            'INSERT INTO users (id, email, password_hash, birth_date, plan, status, terms_accepted_at)
-             VALUES (?, ?, ?, ?, "FREE", "active", NOW())'
+            'INSERT INTO users (id, email, password_hash, birth_date, phone, cpf, city, state, plan, status, terms_accepted_at)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, "FREE", "active", NOW())'
         );
-        $stmt->execute([$userId, $email, $passwordHash, $birthDate]);
+        $stmt->execute([$userId, $email, $passwordHash, $birthDate, $phone, $cpf, $city, $state]);
 
         $stmt = $pdo->prepare(
             'INSERT INTO profiles (id, user_id, display_name, type, interest, description)

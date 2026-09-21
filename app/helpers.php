@@ -197,6 +197,49 @@ function send_password_reset_email(string $toEmail, string $displayName, string 
     @mail($toEmail, $subject, $body, $headers);
 }
 
+function only_digits(string $value): string
+{
+    return preg_replace('/\D/', '', $value) ?? '';
+}
+
+/**
+ * Valida o CPF pelo algoritmo oficial dos dois dígitos verificadores.
+ * Recebe o CPF já só com dígitos (ver only_digits()).
+ */
+function is_valid_cpf(string $cpf): bool
+{
+    if (strlen($cpf) !== 11 || preg_match('/^(\d)\1{10}$/', $cpf)) {
+        return false;
+    }
+
+    for ($pos = 9; $pos <= 10; $pos++) {
+        $sum = 0;
+        for ($i = 0; $i < $pos; $i++) {
+            $sum += (int)$cpf[$i] * ($pos + 1 - $i);
+        }
+        $digit = ($sum * 10) % 11;
+        if ($digit === 10) {
+            $digit = 0;
+        }
+        if ($digit !== (int)$cpf[$pos]) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+function is_valid_phone(string $phone): bool
+{
+    return strlen($phone) >= 10 && strlen($phone) <= 11;
+}
+
+const BRAZIL_STATES = [
+    'AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS',
+    'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC',
+    'SP', 'SE', 'TO',
+];
+
 const PROFILE_TYPE_LABEL = [
     'COUPLE' => 'Casal',
     'SINGLE_WOMAN' => 'Solteira',

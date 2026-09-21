@@ -3,11 +3,18 @@
 
 SET NAMES utf8mb4;
 
+-- phone, cpf e city/state são dados sigilosos: nunca exibidos em nenhuma
+-- página pública nem no perfil de outros usuários (ver signup.php e
+-- perfil.php) — servem só para verificação interna de identidade/idade.
 CREATE TABLE IF NOT EXISTS users (
   id CHAR(36) PRIMARY KEY,
   email VARCHAR(190) NOT NULL UNIQUE,
   password_hash VARCHAR(255) NOT NULL,
   birth_date DATE NOT NULL,
+  phone VARCHAR(20) NOT NULL,
+  cpf CHAR(11) NOT NULL UNIQUE,
+  city VARCHAR(100) NOT NULL,
+  state CHAR(2) NOT NULL,
   plan ENUM('FREE','EXCLUSIVE') NOT NULL DEFAULT 'FREE',
   plan_valid_until DATETIME NULL,
   status VARCHAR(20) NOT NULL DEFAULT 'active',

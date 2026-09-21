@@ -25,6 +25,16 @@ templates/                                      → cabeçalho/rodapé HTML reap
 ## Regras de negócio já implementadas
 
 - Cadastro com verificação de maioridade (18+) e senha com hash (`password_hash`).
+- **Dados sigilosos no cadastro**: além do nome fictício (exibido publicamente),
+  o cadastro agora coleta e-mail, telefone, CPF e cidade/UF. E-mail, telefone
+  e CPF são marcados na tela como sigilosos — ficam só no banco, nunca em
+  nenhuma página pública nem no perfil visto por outros usuários (veja o
+  `SELECT` de `perfil.php`, que não inclui essas colunas). O CPF é validado
+  pelo algoritmo oficial dos dígitos verificadores (`app/helpers.php::is_valid_cpf()`)
+  e serve como confirmação adicional de identidade/idade, complementando a
+  data de nascimento; é único por conta (`users.cpf`) para dificultar
+  múltiplos cadastros da mesma pessoa. Bancos criados antes dessa mudança
+  precisam rodar `database/migrations/2026_09_21_add_signup_fields.sql`.
 - Feed com fotos aprovadas por moderação (`moderation_status`); toda foto nova
   entra como `PENDING` até ser aprovada manualmente no banco.
 - Visibilidade "só amigos": a URL da foto só é enviada ao navegador se o

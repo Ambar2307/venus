@@ -16,6 +16,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'email' => $_POST['email'] ?? '',
                 'password' => $_POST['password'] ?? '',
                 'birth_date' => $_POST['birth_date'] ?? '',
+                'phone' => $_POST['phone'] ?? '',
+                'cpf' => $_POST['cpf'] ?? '',
+                'city' => $_POST['city'] ?? '',
+                'state' => $_POST['state'] ?? '',
                 'display_name' => $_POST['display_name'] ?? '',
                 'type' => $_POST['type'] ?? '',
                 'interest' => $_POST['interest'] ?? '',
@@ -60,8 +64,46 @@ require __DIR__ . '/templates/header.php';
            value="<?= e($_POST['birth_date'] ?? '') ?>">
   </label>
 
-  <input class="input" name="email" type="email" placeholder="E-mail" required
-         value="<?= e($_POST['email'] ?? '') ?>">
+  <div class="form" style="flex-direction:row;gap:.75rem">
+    <label class="text-sm text-muted" style="flex:2">
+      Cidade
+      <input class="input" name="city" placeholder="Cidade" required
+             value="<?= e($_POST['city'] ?? '') ?>">
+    </label>
+    <label class="text-sm text-muted" style="flex:1">
+      UF
+      <select class="input" name="state" required>
+        <option value="">UF</option>
+        <?php foreach (BRAZIL_STATES as $uf): ?>
+          <option value="<?= e($uf) ?>" <?= ($_POST['state'] ?? '') === $uf ? 'selected' : '' ?>><?= e($uf) ?></option>
+        <?php endforeach; ?>
+      </select>
+    </label>
+  </div>
+
+  <p class="text-xs text-muted" style="margin:.5rem 0 0">
+    Os dados abaixo são sigilosos: ficam guardados só para verificação
+    interna de idade/identidade e nunca são exibidos no seu perfil, no feed
+    ou para outros usuários.
+  </p>
+
+  <label class="text-sm text-muted">
+    E-mail <span class="text-xs">(sigiloso — não será divulgado)</span>
+    <input class="input" name="email" type="email" placeholder="E-mail" required
+           value="<?= e($_POST['email'] ?? '') ?>">
+  </label>
+
+  <label class="text-sm text-muted">
+    Telefone <span class="text-xs">(sigiloso — não será divulgado)</span>
+    <input class="input" name="phone" type="tel" placeholder="(11) 91234-5678" required
+           value="<?= e($_POST['phone'] ?? '') ?>">
+  </label>
+
+  <label class="text-sm text-muted">
+    CPF <span class="text-xs">(sigiloso — usado só para confirmar que você é maior de idade; não será divulgado)</span>
+    <input class="input" name="cpf" inputmode="numeric" placeholder="Somente números" required
+           maxlength="14" value="<?= e($_POST['cpf'] ?? '') ?>">
+  </label>
 
   <input class="input" name="password" type="password" placeholder="Senha (mín. 8 caracteres)"
          required minlength="8">
