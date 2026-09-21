@@ -1,0 +1,48 @@
+<?php
+require_once __DIR__ . '/app/bootstrap.php';
+
+if (current_user()) {
+    redirect('/index.php');
+}
+
+$erro = null;
+$sucesso = flash('success');
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (!verify_csrf($_POST['csrf_token'] ?? null)) {
+        $erro = 'Sessão expirada, recarregue a página e tente novamente.';
+    } else {
+        $ok = attempt_login((string)($_POST['email'] ?? ''), (string)($_POST['password'] ?? ''));
+        if ($ok) {
+            redirect('/index.php');
+        }
+        $erro = 'E-mail ou senha inválidos.';
+    }
+}
+
+$pageTitle = 'Entrar — Reserva';
+$activePage = 'login';
+require __DIR__ . '/templates/header.php';
+?>
+
+<h1 class="font-serif">Entrar</h1>
+
+<?php if ($sucesso): ?>
+  <p class="notice" style="max-width:360px"><?= e($sucesso) ?></p>
+<?php endif; ?>
+
+<form method="post" class="form" style="max-width:360px">
+  <?= csrf_field() ?>
+  <input class="input" name="email" type="email" placeholder="E-mail" required>
+  <input class="input" name="password" type="password" placeholder="Senha" required>
+  <?php if ($erro): ?>
+    <p class="error"><?= e($erro) ?></p>
+  <?php endif; ?>
+  <button class="btn" type="submit">Entrar</button>
+</form>
+
+<p class="text-sm text-muted" style="max-width:360px;margin-top:1rem">
+  Ainda não tem perfil? <a href="/signup.php" class="text-gold">Criar agora</a>
+</p>
+
+<?php require __DIR__ . '/templates/footer.php'; ?>

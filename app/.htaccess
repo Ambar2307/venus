@@ -1,0 +1,8 @@
+# Bloqueia acesso direto via navegador a esta pasta (credenciais de banco, lógica interna).
+<IfModule mod_authz_core.c>
+  Require all denied
+</IfModule>
+<IfModule !mod_authz_core.c>
+  Order allow,deny
+  Deny from all
+</IfModule>

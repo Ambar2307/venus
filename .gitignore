@@ -1,6 +1,4 @@
-node_modules/
-.next/
-.env
-.env*.local
-npm-debug.log*
+app/config.php
+uploads/photos/*
+!uploads/photos/.gitkeep
 .DS_Store

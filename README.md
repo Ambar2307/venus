@@ -1,74 +1,112 @@
-# Reserva — starter real (Next.js + Prisma + Postgres)
+# Reserva
 
-Este é o começo funcional da plataforma: cadastro, login, feed com visibilidade
-pública/amigos, curtidas e comentários com limite diário do plano Livre, pedidos
-de amizade e chat interno restrito ao plano Exclusivo.
+Rede social de encontros para casais e solteiros(as): feed de fotos com
+visibilidade pública ou só-para-amigos, curtidas e comentários limitados no
+plano Livre, pedidos de amizade e chat interno exclusivo para assinantes.
 
-O que **não** está pronto ainda (próximos passos naturais):
-- Upload real de imagem (hoje `POST /api/photos` espera uma `url` já hospedada — falta
-  ligar num serviço de storage como Cloudflare R2/S3 e um passo de moderação automática).
-- Fila de moderação de conteúdo.
-- Cobrança recorrente (Stripe/Mercado Pago) alterando `user.plan` via webhook.
-- Telas de Amigos, Chat e Planos no frontend (as rotas de API já existem e funcionam;
-  falta a interface — dá pra reaproveitar o HTML/CSS do protótipo visual).
-- Chat em tempo real (hoje as mensagens funcionam por request/response comum, sem WebSocket).
+Stack: **PHP puro + MySQL**, sem framework e sem dependência de Node/Composer
+em produção — feito para rodar em hospedagem compartilhada comum (cPanel),
+como a Locaweb.
 
-## Como rodar localmente
+## Estrutura
 
-1. **Instalar dependências**
-   ```bash
-   npm install
-   ```
+```
+index.php, login.php, signup.php, logout.php,
+perfil.php, amigos.php, chat.php, planos.php   → páginas
+api/                                            → endpoints JSON usados via fetch() (curtir, comentar, amizade, chat)
+app/                                            → lógica (auth, banco, limites, visibilidade de fotos) — bloqueado por .htaccess
+database/schema.sql                             → schema MySQL
+assets/                                         → CSS e JS estáticos (sem build step)
+uploads/photos/                                 → fotos enviadas pelos usuários (.htaccess impede execução de scripts aqui)
+templates/                                      → cabeçalho/rodapé HTML reaproveitados pelas páginas
+```
 
-2. **Banco de dados**: crie um Postgres (mais rápido: conta grátis no
-   [Supabase](https://supabase.com) ou [Neon](https://neon.tech)) e copie a
-   *connection string*.
+## Regras de negócio já implementadas
 
-3. **Variáveis de ambiente**
-   ```bash
-   cp .env.example .env
-   ```
-   Preencha `DATABASE_URL` com a connection string do passo 2, e gere um valor
-   para `NEXTAUTH_SECRET` (ex.: `openssl rand -base64 32`).
+- Cadastro com verificação de maioridade (18+) e senha com hash (`password_hash`).
+- Feed com fotos aprovadas por moderação (`moderation_status`); toda foto nova
+  entra como `PENDING` até ser aprovada manualmente no banco.
+- Visibilidade "só amigos": a URL da foto só é enviada ao navegador se o
+  `viewer` for o dono ou amigo aceito (`app/friends.php`) — checado sempre no
+  servidor, nunca confiando no cliente.
+- Limite diário do plano Livre — 3 curtidas e 3 comentários por dia
+  (`app/limits.php`, tabela `daily_usage`); plano Exclusivo é ilimitado.
+- Só o plano Exclusivo pode marcar fotos como "somente amigos"; no plano
+  Livre a visibilidade é sempre forçada para pública.
+- Chat interno (`api/messages.php`, `chat.php`) restrito ao plano Exclusivo,
+  com atualização por polling (sem WebSocket — compatível com hospedagem
+  compartilhada, que normalmente não permite processos persistentes).
+- CSRF: todo formulário tem token de sessão; toda chamada `fetch()` envia o
+  header `X-CSRF-Token`.
+- Upload de foto: valida tipo real do arquivo (`finfo`, não a extensão),
+  limita tamanho, salva com nome aleatório; a pasta `uploads/` tem
+  `.htaccess` que impede qualquer arquivo enviado de ser executado como
+  script, mesmo que alguém envie um `.php` disfarçado de imagem.
 
-4. **Criar as tabelas no banco**
-   ```bash
-   npx prisma migrate dev --name init
-   ```
+## O que falta (próximos passos naturais)
 
-5. **Rodar o servidor**
-   ```bash
-   npm run dev
-   ```
-   Acesse `http://localhost:3000`.
+- **Painel de moderação**: hoje aprovar foto é manual, direto no banco
+  (`UPDATE photos SET moderation_status='APPROVED' WHERE id=...`). Uma
+  tela simples de admin é o próximo passo óbvio.
+- **Cobrança recorrente** (ex.: Mercado Pago, mais comum no Brasil que
+  Stripe): a página `planos.php` já mostra a comparação Livre × Exclusivo,
+  falta ligar o botão "Assinar" a um checkout de verdade que, via webhook,
+  atualize `users.plan` e `users.plan_valid_until`.
+- **Redimensionar/otimizar imagens no upload** (a extensão `gd` do PHP,
+  presente na maioria dos planos cPanel, permite isso) para não depender
+  do tamanho enviado pelo usuário.
+- Nota de segurança: como as fotos ficam em `uploads/photos/` com nome
+  aleatório mas publicamente servidas pelo Apache, uma foto "só amigos"
+  não aparece pra quem não é amigo pela interface — mas quem descobrir a
+  URL exata (nome de arquivo aleatório de 36 caracteres) consegue abrir o
+  arquivo direto. Isso é aceitável pra um MVP, mas se o sigilo das fotos
+  reservadas for crítico, o passo seguinte é servir esses arquivos por um
+  script PHP que reforça a checagem de amizade antes de entregar o arquivo
+  (mais lento, mas sem depender só do nome ser difícil de adivinhar).
 
-6. **Ver os dados** (opcional, interface visual do banco):
-   ```bash
-   npx prisma studio
-   ```
+## Como publicar na Locaweb (hospedagem compartilhada / cPanel)
 
-## Testando o fluxo manualmente
+1. **Banco de dados**: no cPanel, crie um banco MySQL e um usuário com
+   acesso total a ele (`Bancos de Dados MySQL®` → `Adicionar Banco de Dados`
+   e `Adicionar Usuário`). Importe `database/schema.sql` pelo phpMyAdmin
+   (aba "Importar").
+2. **Configuração**: copie `app/config.example.php` para `app/config.php` e
+   preencha `db_host` (geralmente `localhost`), `db_name`, `db_user`,
+   `db_pass` com os dados criados no passo 1, e gere um `session_secret`
+   aleatório (`openssl rand -hex 32`, ou qualquer gerador de string longa).
+3. **Upload dos arquivos**: envie todo o conteúdo deste projeto (via FTP ou
+   o Gerenciador de Arquivos do cPanel) para `public_html` (ou a subpasta
+   do domínio/subdomínio onde o site vai rodar).
+4. **Permissão de escrita**: garanta que a pasta `uploads/photos/` tenha
+   permissão de escrita para o PHP (normalmente `755` já basta em cPanel;
+   se der erro de upload, tente `775`).
+5. **PHP**: confirme na seção "Selecionar Versão do PHP" do cPanel que está
+   em PHP 8.x com as extensões `pdo_mysql`, `mbstring`, `fileinfo` e `gd`
+   ativadas (todas vêm habilitadas por padrão nos planos comuns).
+6. Acesse o domínio — a página inicial (`index.php`) já é o feed.
 
-1. Vá em `/signup` e crie um perfil.
-2. Faça login em `/login`.
-3. Publique uma foto direto pela API (por enquanto não há tela pra isso):
-   ```bash
-   curl -X POST http://localhost:3000/api/photos \
-     -H "Content-Type: application/json" \
-     -H "Cookie: <copie o cookie de sessão do navegador>" \
-     -d '{"url":"https://exemplo.com/foto.jpg","caption":"Teste","visibility":"PUBLIC"}'
-   ```
-4. Ela entra como `PENDING` — aprove manualmente no `prisma studio` (mude
-   `moderationStatus` para `APPROVED`) pra ela aparecer no feed em `/`.
+Nenhum passo de build é necessário: não há `npm install`, não há
+`composer install`, é só enviar os arquivos `.php` e o servidor já entende.
 
-## Onde continuar
+## Rodando localmente para desenvolver
 
-Este starter cobre a parte de regra de negócio que mais importa (limites diários,
-visibilidade de foto por amizade, chat travado por plano). O próximo passo natural é
-recriar a interface visual do protótipo (feed, perfil, amigos, chat, planos) puxando
-dados dessas rotas de API — e ligar upload de imagem e cobrança de verdade.
+Requisitos: PHP 8.1+ com `pdo_mysql`, e um MySQL/MariaDB.
 
-Para continuar esse desenvolvimento com testes reais (instalar pacotes, subir banco,
-rodar o app, iterar rápido), o ideal é abrir esta pasta no **Claude Code**, que consegue
-executar comandos e testar o app de ponta a ponta — algo que este ambiente de chat não
-consegue fazer por não ter acesso à internet.
+```bash
+mysql -u root -e "CREATE DATABASE reserva CHARACTER SET utf8mb4;"
+mysql -u root reserva < database/schema.sql
+cp app/config.example.php app/config.php   # ajuste db_user/db_pass
+php -S localhost:8080
+```
+
+Acesse `http://localhost:8080`. Crie um perfil em `/signup.php`, faça login,
+publique uma foto pelo formulário do feed — ela entra como `PENDING`, aprove
+manualmente no banco (`UPDATE photos SET moderation_status='APPROVED'`) para
+ela aparecer.
+
+## Histórico
+
+A primeira versão deste projeto foi prototipada em Next.js/Prisma/Postgres
+(preservada no histórico do git). Ela foi substituída por esta versão em
+PHP puro para poder rodar em hospedagem compartilhada comum, sem exigir um
+processo Node.js persistente.
