@@ -96,6 +96,39 @@
     });
   });
 
+  // --- Seguir / deixar de seguir ---
+  document.querySelectorAll("[data-follow-btn]").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var userId = btn.getAttribute("data-user-id");
+      postJSON("/api/follow.php", { user_id: userId })
+        .then(function (res) {
+          if (res.seguindo) {
+            btn.textContent = "Deixar de seguir";
+            btn.classList.add("btn-ghost");
+          } else {
+            btn.textContent = "Seguir";
+            btn.classList.remove("btn-ghost");
+          }
+          btn.setAttribute("data-following", res.seguindo ? "1" : "0");
+        })
+        .catch(handleError);
+    });
+  });
+
+  // --- Excluir foto (Meu perfil) ---
+  document.querySelectorAll("[data-delete-photo-btn]").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      if (!confirm("Excluir essa foto? Não pode ser desfeito.")) return;
+      var photoId = btn.getAttribute("data-photo-id");
+      postJSON("/api/photo_delete.php", { photo_id: photoId })
+        .then(function () {
+          var card = document.querySelector('[data-my-photo="' + photoId + '"]');
+          if (card) card.remove();
+        })
+        .catch(handleError);
+    });
+  });
+
   // --- Denunciar foto ---
   document.querySelectorAll("[data-report-btn]").forEach(function (btn) {
     btn.addEventListener("click", function () {

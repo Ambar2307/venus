@@ -14,6 +14,13 @@ if ($photoId === '') {
     json_response(['erro' => 'photo_id é obrigatório.'], 400);
 }
 
+$stmt = db()->prepare('SELECT user_id FROM photos WHERE id = ?');
+$stmt->execute([$photoId]);
+$foto = $stmt->fetch();
+if (!$foto) {
+    json_response(['erro' => 'Foto não encontrada.'], 404);
+}
+
 $stmt = db()->prepare('SELECT id FROM likes WHERE user_id = ? AND photo_id = ?');
 $stmt->execute([$user['id'], $photoId]);
 if ($stmt->fetch()) {
@@ -28,5 +35,6 @@ if (!$checagem['permitido']) {
 $stmt = db()->prepare('INSERT INTO likes (id, user_id, photo_id) VALUES (?, ?, ?)');
 $stmt->execute([gen_uuid(), $user['id'], $photoId]);
 registrar_curtida($user['id']);
+create_notification($foto['user_id'], $user['id'], 'LIKE', $photoId);
 
 json_response(['ok' => true]);

@@ -19,6 +19,13 @@ if (mb_strlen($text) > 500) {
     json_response(['erro' => 'Comentário muito longo (máx. 500 caracteres).'], 400);
 }
 
+$stmt = db()->prepare('SELECT user_id FROM photos WHERE id = ?');
+$stmt->execute([$photoId]);
+$foto = $stmt->fetch();
+if (!$foto) {
+    json_response(['erro' => 'Foto não encontrada.'], 404);
+}
+
 $checagem = pode_comentar($user['id'], $user['plan']);
 if (!$checagem['permitido']) {
     json_response(['erro' => $checagem['motivo'], 'upgrade' => true], 403);
@@ -27,6 +34,7 @@ if (!$checagem['permitido']) {
 $stmt = db()->prepare('INSERT INTO comments (id, user_id, photo_id, body) VALUES (?, ?, ?, ?)');
 $stmt->execute([gen_uuid(), $user['id'], $photoId, $text]);
 registrar_comentario($user['id']);
+create_notification($foto['user_id'], $user['id'], 'COMMENT', $photoId, mb_substr($text, 0, 140));
 
 json_response([
     'ok' => true,

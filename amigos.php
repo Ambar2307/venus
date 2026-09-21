@@ -13,15 +13,7 @@ $stmt = db()->prepare(
 $stmt->execute([$currentUser['id']]);
 $pendentes = $stmt->fetchAll();
 
-$stmt = db()->prepare(
-    "SELECT p.user_id, p.display_name, p.type
-     FROM friend_requests fr
-     JOIN profiles p ON p.user_id = IF(fr.from_id = ?, fr.to_id, fr.from_id)
-     WHERE fr.status = 'ACCEPTED' AND (fr.from_id = ? OR fr.to_id = ?)
-     ORDER BY p.display_name ASC"
-);
-$stmt->execute([$currentUser['id'], $currentUser['id'], $currentUser['id']]);
-$amigos = $stmt->fetchAll();
+$amigos = list_friends($currentUser['id']);
 
 $busca = trim((string)($_GET['q'] ?? ''));
 $resultados = [];
@@ -86,7 +78,7 @@ require __DIR__ . '/templates/header.php';
 <div class="card">
   <?php foreach ($amigos as $a): ?>
     <div class="friend-row">
-      <a href="/perfil.php?id=<?= e($a['user_id']) ?>" class="text-sm">
+      <a href="/perfil.php?id=<?= e($a['id']) ?>" class="text-sm">
         <?= e($a['display_name']) ?>
         <span class="text-xs text-muted"><?= e(PROFILE_TYPE_LABEL[$a['type']] ?? '') ?></span>
       </a>

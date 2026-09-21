@@ -10,6 +10,8 @@ require_once __DIR__ . '/auth.php';
 require_once __DIR__ . '/limits.php';
 require_once __DIR__ . '/friends.php';
 require_once __DIR__ . '/photos.php';
+require_once __DIR__ . '/social.php';
+require_once __DIR__ . '/notifications.php';
 
 if (session_status() === PHP_SESSION_NONE) {
     $isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')

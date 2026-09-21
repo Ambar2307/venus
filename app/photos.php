@@ -18,6 +18,39 @@ function create_photo(array $user, array $file, string $caption, string $visibil
     $stmt->execute([gen_uuid(), $user['id'], $filePath, $caption !== '' ? $caption : null, $visibilidadeFinal]);
 }
 
+/**
+ * Exclui uma foto do usuário (registro + arquivo no disco). Lança
+ * RuntimeException se a foto não existir ou não pertencer a ele.
+ */
+function delete_photo(string $userId, string $photoId): void
+{
+    $stmt = db()->prepare('SELECT file_path FROM photos WHERE id = ? AND user_id = ?');
+    $stmt->execute([$photoId, $userId]);
+    $foto = $stmt->fetch();
+
+    if (!$foto) {
+        throw new RuntimeException('Foto não encontrada.');
+    }
+
+    $stmt = db()->prepare('DELETE FROM photos WHERE id = ?');
+    $stmt->execute([$photoId]);
+
+    $abs = __DIR__ . '/../' . $foto['file_path'];
+    if (is_file($abs)) {
+        @unlink($abs);
+    }
+}
+
+/** Todas as fotos (qualquer status de moderação) do próprio usuário, mais recentes primeiro. */
+function fetch_own_photos(string $userId): array
+{
+    $stmt = db()->prepare(
+        'SELECT * FROM photos WHERE user_id = ? ORDER BY created_at DESC'
+    );
+    $stmt->execute([$userId]);
+    return $stmt->fetchAll();
+}
+
 /** Busca o feed (fotos aprovadas) já resolvendo visibilidade, curtidas e comentários. */
 function fetch_feed(?string $viewerId, int $limit = 30): array
 {

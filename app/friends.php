@@ -17,6 +17,20 @@ function sao_amigos(string $userAId, string $userBId): bool
     return (bool)$stmt->fetch();
 }
 
+/** Lista os amigos aceitos de $userId (nome, tipo, id — para telas de perfil). */
+function list_friends(string $userId): array
+{
+    $stmt = db()->prepare(
+        "SELECT p.user_id AS id, p.display_name, p.type
+         FROM friend_requests fr
+         JOIN profiles p ON p.user_id = IF(fr.from_id = ?, fr.to_id, fr.from_id)
+         WHERE fr.status = 'ACCEPTED' AND (fr.from_id = ? OR fr.to_id = ?)
+         ORDER BY p.display_name ASC"
+    );
+    $stmt->execute([$userId, $userId, $userId]);
+    return $stmt->fetchAll();
+}
+
 /**
  * Decide se $viewerId pode ver o arquivo real de uma foto.
  * Fotos públicas: sempre visíveis. Fotos "amigos": só para o dono ou amigos aceitos.

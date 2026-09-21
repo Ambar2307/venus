@@ -2,31 +2,6 @@
 require_once __DIR__ . '/app/bootstrap.php';
 
 $currentUser = current_user();
-$erro = null;
-$sucesso = flash('success');
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && $currentUser) {
-    if (!verify_csrf($_POST['csrf_token'] ?? null)) {
-        $erro = 'Sessão expirada, recarregue a página e tente novamente.';
-    } else {
-        try {
-            if (empty($_FILES['photo']['name'])) {
-                throw new RuntimeException('Selecione uma foto para publicar.');
-            }
-            create_photo(
-                $currentUser,
-                $_FILES['photo'],
-                trim((string)($_POST['caption'] ?? '')),
-                (string)($_POST['visibility'] ?? 'PUBLIC')
-            );
-            flash('success', 'Foto enviada! Ela aparece no feed assim que for aprovada na moderação.');
-            redirect('/index.php');
-        } catch (RuntimeException $e) {
-            $erro = $e->getMessage();
-        }
-    }
-}
-
 $fotos = fetch_feed($currentUser['id'] ?? null);
 
 $pageTitle = 'Feed — Reserva';
@@ -35,6 +10,7 @@ require __DIR__ . '/templates/header.php';
 ?>
 
 <h1 class="font-serif">Feed</h1>
+<p class="text-xs text-muted" style="margin-bottom:1.5rem">Últimas atualizações da comunidade.</p>
 
 <?php if (!$currentUser): ?>
   <div class="notice" style="margin-bottom:1.5rem">
@@ -42,29 +18,10 @@ require __DIR__ . '/templates/header.php';
     <a href="/login.php" class="text-gold">Entrar</a> ou
     <a href="/signup.php" class="text-gold">criar perfil</a> para curtir e comentar.
   </div>
-<?php endif; ?>
-
-<?php if ($sucesso): ?>
-  <div class="notice" style="margin-bottom:1.5rem"><?= e($sucesso) ?></div>
-<?php endif; ?>
-
-<?php if ($currentUser): ?>
-  <form method="post" enctype="multipart/form-data" class="form card" style="padding:1rem;margin-bottom:2rem">
-    <?= csrf_field() ?>
-    <strong class="text-sm">Publicar foto</strong>
-    <input class="input" type="file" name="photo" accept="image/jpeg,image/png,image/webp" required>
-    <input class="input" type="text" name="caption" placeholder="Legenda (opcional)" maxlength="500">
-    <label class="text-sm text-muted">
-      <select class="input" name="visibility">
-        <option value="PUBLIC">Pública</option>
-        <option value="FRIENDS" <?= is_exclusive($currentUser) ? '' : 'disabled' ?>>
-          Somente amigos <?= is_exclusive($currentUser) ? '' : '(plano Exclusivo)' ?>
-        </option>
-      </select>
-    </label>
-    <?php if ($erro): ?><p class="error"><?= e($erro) ?></p><?php endif; ?>
-    <button class="btn" type="submit">Publicar</button>
-  </form>
+<?php elseif (!fetch_own_photos($currentUser['id'])): ?>
+  <div class="notice" style="margin-bottom:1.5rem">
+    Publique sua primeira foto em <a href="/perfil.php" class="text-gold">Meu perfil</a>.
+  </div>
 <?php endif; ?>
 
 <div class="stack">

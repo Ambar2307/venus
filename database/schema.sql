@@ -129,6 +129,47 @@ CREATE TABLE IF NOT EXISTS reports (
   INDEX idx_reports_status (status, created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- Seguir é diferente de amizade: é de mão única (não exige aceite) e não dá
+-- acesso a fotos "reservadas aos amigos" — só aparece nas listas de
+-- seguidores/seguindo e conta pra "Recomendados".
+CREATE TABLE IF NOT EXISTS follows (
+  id CHAR(36) PRIMARY KEY,
+  follower_id CHAR(36) NOT NULL,
+  followed_id CHAR(36) NOT NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY uniq_follow (follower_id, followed_id),
+  FOREIGN KEY (follower_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (followed_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Registro de "quem visitou meu perfil". Só grava visitas de usuários
+-- logados (nunca de visitantes anônimos, que não têm identidade pra mostrar).
+CREATE TABLE IF NOT EXISTS profile_visits (
+  id CHAR(36) PRIMARY KEY,
+  visitor_id CHAR(36) NOT NULL,
+  visited_id CHAR(36) NOT NULL,
+  visited_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (visitor_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (visited_id) REFERENCES users(id) ON DELETE CASCADE,
+  INDEX idx_profile_visits_visited (visited_id, visited_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Notificação de curtida/comentário recebido numa foto sua.
+CREATE TABLE IF NOT EXISTS notifications (
+  id CHAR(36) PRIMARY KEY,
+  user_id CHAR(36) NOT NULL,
+  actor_id CHAR(36) NOT NULL,
+  type ENUM('LIKE','COMMENT') NOT NULL,
+  photo_id CHAR(36) NOT NULL,
+  comment_snippet VARCHAR(140) NULL,
+  read_at DATETIME NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (actor_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (photo_id) REFERENCES photos(id) ON DELETE CASCADE,
+  INDEX idx_notifications_user (user_id, read_at, created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 CREATE TABLE IF NOT EXISTS messages (
   id CHAR(36) PRIMARY KEY,
   conversation_id CHAR(36) NOT NULL,

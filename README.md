@@ -12,10 +12,11 @@ como a Locaweb.
 
 ```
 index.php, login.php, signup.php, logout.php,
-perfil.php, amigos.php, chat.php, planos.php   → páginas
+perfil.php, amigos.php, buscar.php,
+notificacoes.php, chat.php, planos.php          → páginas
 admin/moderacao.php                             → aprovar/rejeitar fotos pendentes (só para usuários com is_admin=1)
-api/                                            → endpoints JSON usados via fetch() (curtir, comentar, amizade, chat, moderação)
-app/                                            → lógica (auth, banco, limites, visibilidade de fotos) — bloqueado por .htaccess
+api/                                            → endpoints JSON usados via fetch() (curtir, comentar, amizade, seguir, chat, moderação)
+app/                                            → lógica (auth, banco, limites, visibilidade de fotos, social) — bloqueado por .htaccess
 database/schema.sql                             → schema MySQL
 assets/                                         → CSS e JS estáticos (sem build step)
 uploads/photos/                                 → fotos enviadas pelos usuários (.htaccess impede execução de scripts aqui)
@@ -103,6 +104,40 @@ sem reprocessar (a app não quebra, só perde essa otimização).
   estranho). **Nota**: o servidor embutido do PHP (`php -S`, usado em
   "Rodando localmente") não lê `.htaccess` — esse bloqueio só é aplicado de
   fato por um servidor Apache de verdade, como o da Locaweb.
+
+- **"Meu perfil" reorganizado**: o upload e a exclusão de fotos saíram do
+  feed principal e agora vivem só na própria página de perfil
+  (`perfil.php`, quando é o dono vendo o próprio perfil). Lá dentro há 5
+  abas: "Minhas fotos" (upload + lista de todas as fotos próprias, com
+  status "Aguardando aprovação"/"Aprovada"/"Rejeitada" e botão de
+  excluir), "Meus amigos" (amizades aceitas), "Meus seguidores",
+  "Recomendados" e "Visitas recebidas". O feed (`index.php`) virou
+  puramente uma vitrine das últimas fotos aprovadas da comunidade, sem
+  nenhum formulário — só mostra um aviso com link para `/perfil.php`
+  quando o usuário logado ainda não publicou nenhuma foto própria.
+- **Seguir (`follows`) é diferente de amizade**: seguir é uma ação de mão
+  única, sem precisar de aceite (`app/social.php::toggle_follow()`),
+  aparece nas listas de "Meus seguidores"/"Seguindo" e entra como
+  critério de exclusão nas recomendações — mas **não** dá acesso a fotos
+  marcadas como "só amigos"; isso continua exigindo pedido de amizade
+  aceito (`friend_requests`), como antes.
+- **Visitas de perfil** (`profile_visits`): toda vez que alguém visualiza
+  o perfil de outra pessoa (nunca ao visitar o próprio, nem visitas
+  anônimas) fica registrado um timestamp; a aba "Visitas recebidas" lista
+  quem visitou, sem duplicar entradas do mesmo visitante no mesmo dia.
+- **Recomendados**: sugestão simples e explicável (não é IA/ML) que
+  exclui o próprio usuário, quem já é seguido e quem já é amigo aceito,
+  priorizando perfis da mesma cidade (`app/social.php::list_recommended_profiles()`).
+- **Buscar** (`buscar.php`): filtro por tipo de perfil (casal/mulher
+  solteira/homem solteiro), cidade e interesse, combináveis; cada
+  resultado mostra o botão de seguir já refletindo se o usuário logado já
+  segue aquele perfil ou não.
+- **Notificações** (`notificacoes.php`, tabela `notifications`): toda
+  curtida ou comentário recebido por uma foto gera uma notificação para o
+  dono da foto (nunca para curtida/comentário na própria foto); o menu
+  mostra um selo com a quantidade de notificações não lidas
+  (`app/notifications.php::count_unread_notifications()`), que zera ao
+  abrir a página de notificações.
 
 ## O que falta (próximos passos naturais)
 

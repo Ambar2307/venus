@@ -19,9 +19,15 @@ $activePage = $activePage ?? '';
     <div class="nav-links">
       <a href="/index.php" class="<?= $activePage === 'feed' ? 'active' : '' ?>">Feed</a>
       <?php if ($currentUser): ?>
+        <a href="/buscar.php" class="<?= $activePage === 'buscar' ? 'active' : '' ?>">Buscar</a>
         <a href="/amigos.php" class="<?= $activePage === 'amigos' ? 'active' : '' ?>">Amigos</a>
         <a href="/chat.php" class="<?= $activePage === 'chat' ? 'active' : '' ?>">Chat</a>
-        <a href="/perfil.php" class="<?= $activePage === 'perfil' ? 'active' : '' ?>">Perfil</a>
+        <a href="/perfil.php" class="<?= $activePage === 'perfil' ? 'active' : '' ?>">Meu perfil</a>
+        <a href="/notificacoes.php" class="<?= $activePage === 'notificacoes' ? 'active' : '' ?>">
+          Notificações<?php $naoLidas = count_unread_notifications($currentUser['id']); ?><?php if ($naoLidas > 0): ?>
+            <span class="badge badge-gold" style="margin-left:.25rem"><?= $naoLidas ?></span>
+          <?php endif; ?>
+        </a>
         <a href="/planos.php" class="<?= $activePage === 'planos' ? 'active' : '' ?>">Planos</a>
         <?php if (is_admin($currentUser)): ?>
           <a href="/admin/moderacao.php" class="text-gold <?= $activePage === 'moderacao' ? 'active' : '' ?>">Moderação</a>
