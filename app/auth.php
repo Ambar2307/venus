@@ -172,3 +172,28 @@ function require_exclusive_api(): array
     }
     return $user;
 }
+
+function is_admin(array $user): bool
+{
+    return (bool)($user['is_admin'] ?? false);
+}
+
+/** Para páginas em admin/: redireciona ao feed se não for administrador. */
+function require_admin_page(): array
+{
+    $user = require_login_page();
+    if (!is_admin($user)) {
+        redirect('/index.php');
+    }
+    return $user;
+}
+
+/** Para endpoints em api/: responde 403 em JSON se não for administrador. */
+function require_admin_api(): array
+{
+    $user = require_login_api();
+    if (!is_admin($user)) {
+        json_response(['erro' => 'Restrito a administradores.'], 403);
+    }
+    return $user;
+}

@@ -13,7 +13,8 @@ como a Locaweb.
 ```
 index.php, login.php, signup.php, logout.php,
 perfil.php, amigos.php, chat.php, planos.php   → páginas
-api/                                            → endpoints JSON usados via fetch() (curtir, comentar, amizade, chat)
+admin/moderacao.php                             → aprovar/rejeitar fotos pendentes (só para usuários com is_admin=1)
+api/                                            → endpoints JSON usados via fetch() (curtir, comentar, amizade, chat, moderação)
 app/                                            → lógica (auth, banco, limites, visibilidade de fotos) — bloqueado por .htaccess
 database/schema.sql                             → schema MySQL
 assets/                                         → CSS e JS estáticos (sem build step)
@@ -42,12 +43,14 @@ templates/                                      → cabeçalho/rodapé HTML reap
   limita tamanho, salva com nome aleatório; a pasta `uploads/` tem
   `.htaccess` que impede qualquer arquivo enviado de ser executado como
   script, mesmo que alguém envie um `.php` disfarçado de imagem.
+- **Painel de moderação** (`admin/moderacao.php`): usuários com
+  `is_admin=1` veem um link "Moderação" no menu e podem aprovar ou
+  rejeitar cada foto pendente com um clique, com preview da imagem.
+  Nenhuma conta é admin por padrão — veja "Promovendo o primeiro
+  administrador" abaixo.
 
 ## O que falta (próximos passos naturais)
 
-- **Painel de moderação**: hoje aprovar foto é manual, direto no banco
-  (`UPDATE photos SET moderation_status='APPROVED' WHERE id=...`). Uma
-  tela simples de admin é o próximo passo óbvio.
 - **Cobrança recorrente** (ex.: Mercado Pago, mais comum no Brasil que
   Stripe): a página `planos.php` já mostra a comparação Livre × Exclusivo,
   falta ligar o botão "Assinar" a um checkout de verdade que, via webhook,
@@ -88,6 +91,18 @@ templates/                                      → cabeçalho/rodapé HTML reap
 Nenhum passo de build é necessário: não há `npm install`, não há
 `composer install`, é só enviar os arquivos `.php` e o servidor já entende.
 
+### Promovendo o primeiro administrador
+
+Nenhuma conta nasce administradora. Depois de criar seu próprio perfil pelo
+`/signup.php`, promova-o pelo phpMyAdmin (aba "SQL") ou pela linha de comando:
+
+```sql
+UPDATE users SET is_admin = 1 WHERE email = 'seu-email@exemplo.com';
+```
+
+A partir daí, um link "Moderação" aparece no menu dessa conta, em
+`/admin/moderacao.php`, para aprovar ou rejeitar as fotos pendentes.
+
 ## Rodando localmente para desenvolver
 
 Requisitos: PHP 8.1+ com `pdo_mysql`, e um MySQL/MariaDB.
@@ -100,9 +115,9 @@ php -S localhost:8080
 ```
 
 Acesse `http://localhost:8080`. Crie um perfil em `/signup.php`, faça login,
-publique uma foto pelo formulário do feed — ela entra como `PENDING`, aprove
-manualmente no banco (`UPDATE photos SET moderation_status='APPROVED'`) para
-ela aparecer.
+publique uma foto pelo formulário do feed — ela entra como `PENDING`. Promova
+sua conta a admin (`UPDATE users SET is_admin=1 WHERE email='...'`) e aprove
+pelo painel em `/admin/moderacao.php` para ela aparecer no feed.
 
 ## Histórico
 

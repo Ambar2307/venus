@@ -23,6 +23,9 @@ $activePage = $activePage ?? '';
         <a href="/chat.php" class="<?= $activePage === 'chat' ? 'active' : '' ?>">Chat</a>
         <a href="/perfil.php" class="<?= $activePage === 'perfil' ? 'active' : '' ?>">Perfil</a>
         <a href="/planos.php" class="<?= $activePage === 'planos' ? 'active' : '' ?>">Planos</a>
+        <?php if (is_admin($currentUser)): ?>
+          <a href="/admin/moderacao.php" class="text-gold <?= $activePage === 'moderacao' ? 'active' : '' ?>">Moderação</a>
+        <?php endif; ?>
         <a href="/logout.php">Sair</a>
       <?php else: ?>
         <a href="/login.php" class="<?= $activePage === 'login' ? 'active' : '' ?>">Entrar</a>

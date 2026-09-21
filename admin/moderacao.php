@@ -1,0 +1,92 @@
+<?php
+require_once __DIR__ . '/../app/bootstrap.php';
+
+$currentUser = require_admin_page();
+
+$stmt = db()->prepare(
+    "SELECT p.*, pr.display_name
+     FROM photos p
+     JOIN profiles pr ON pr.user_id = p.user_id
+     WHERE p.moderation_status = 'PENDING'
+     ORDER BY p.created_at ASC"
+);
+$stmt->execute();
+$pendentes = $stmt->fetchAll();
+
+$stmt = db()->prepare(
+    "SELECT p.*, pr.display_name
+     FROM photos p
+     JOIN profiles pr ON pr.user_id = p.user_id
+     WHERE p.moderation_status IN ('APPROVED', 'REJECTED')
+     ORDER BY p.created_at DESC
+     LIMIT 20"
+);
+$stmt->execute();
+$recentes = $stmt->fetchAll();
+
+$pageTitle = 'Moderação — Reserva';
+$activePage = 'moderacao';
+require __DIR__ . '/../templates/header.php';
+?>
+
+<h1 class="font-serif">Moderação de fotos</h1>
+<p class="text-sm text-muted" style="margin-bottom:1.5rem">
+  <span data-pending-count><?= count($pendentes) ?></span> foto(s) aguardando aprovação.
+</p>
+
+<div class="stack" data-moderation-list>
+  <?php foreach ($pendentes as $foto): ?>
+    <article class="card" data-mod-photo="<?= e($foto['id']) ?>">
+      <div class="photo-header">
+        <div class="avatar"></div>
+        <div>
+          <div class="text-sm" style="font-weight:600"><?= e($foto['display_name']) ?></div>
+          <div class="text-xs text-muted"><?= e(date('d/m/Y H:i', strtotime($foto['created_at']))) ?></div>
+        </div>
+        <?php if ($foto['visibility'] === 'FRIENDS'): ?>
+          <span class="badge badge-gold" style="margin-left:auto">Amigos</span>
+        <?php endif; ?>
+      </div>
+      <div class="photo-media">
+        <img src="/<?= e($foto['file_path']) ?>" alt="">
+      </div>
+      <div class="photo-body">
+        <?php if ($foto['caption']): ?>
+          <p class="text-sm"><?= e($foto['caption']) ?></p>
+        <?php endif; ?>
+        <div class="photo-actions">
+          <button class="btn btn-sm" data-mod-btn data-photo-id="<?= e($foto['id']) ?>" data-action="approve">
+            Aprovar
+          </button>
+          <button class="btn btn-ghost btn-sm" data-mod-btn data-photo-id="<?= e($foto['id']) ?>" data-action="reject">
+            Rejeitar
+          </button>
+        </div>
+      </div>
+    </article>
+  <?php endforeach; ?>
+
+  <?php if (!$pendentes): ?>
+    <p class="text-sm text-muted">Nenhuma foto pendente. 🎉</p>
+  <?php endif; ?>
+</div>
+
+<h3 class="text-sm" style="margin-top:2.5rem">Últimas decisões</h3>
+<div class="card">
+  <?php foreach ($recentes as $foto): ?>
+    <div class="friend-row">
+      <span class="text-sm">
+        <?= e($foto['display_name']) ?>
+        <span class="text-xs text-muted">— <?= e(date('d/m/Y H:i', strtotime($foto['created_at']))) ?></span>
+      </span>
+      <span class="badge <?= $foto['moderation_status'] === 'APPROVED' ? 'badge-gold' : '' ?>">
+        <?= $foto['moderation_status'] === 'APPROVED' ? 'Aprovada' : 'Rejeitada' ?>
+      </span>
+    </div>
+  <?php endforeach; ?>
+  <?php if (!$recentes): ?>
+    <div class="friend-row"><span class="text-sm text-muted">Nenhuma decisão ainda.</span></div>
+  <?php endif; ?>
+</div>
+
+<?php require __DIR__ . '/../templates/footer.php'; ?>

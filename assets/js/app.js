@@ -96,6 +96,24 @@
     });
   });
 
+  // --- Moderação de fotos (admin) ---
+  document.querySelectorAll("[data-mod-btn]").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var photoId = btn.getAttribute("data-photo-id");
+      var action = btn.getAttribute("data-action");
+      postJSON("/api/admin_moderate.php", { photo_id: photoId, action: action })
+        .then(function () {
+          var card = document.querySelector('[data-mod-photo="' + photoId + '"]');
+          if (card) card.remove();
+          var countEl = document.querySelector("[data-pending-count]");
+          if (countEl) {
+            countEl.textContent = String(Math.max(0, parseInt(countEl.textContent, 10) - 1));
+          }
+        })
+        .catch(handleError);
+    });
+  });
+
   // --- Responder pedido de amizade ---
   document.querySelectorAll("[data-friend-respond-btn]").forEach(function (btn) {
     btn.addEventListener("click", function () {
