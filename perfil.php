@@ -49,7 +49,7 @@ $fotosReservadas = array_values(array_filter($todasFotos, fn($f) => $f['visibili
 $tipo = PROFILE_TYPE_LABEL[$profile['type']] ?? '';
 $desde = date('m/Y', strtotime($profile['created_at']));
 
-$pageTitle = e($profile['display_name']) . ' — Reserva';
+$pageTitle = $profile['display_name'] . ' — Reserva';
 $activePage = 'perfil';
 require __DIR__ . '/templates/header.php';
 ?>
