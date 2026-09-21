@@ -80,6 +80,9 @@ function register_user(array $input): string
 }
 
 /** Tenta autenticar; em sucesso inicia a sessão e retorna true. */
+const LOGIN_MAX_ATTEMPTS = 5;
+const LOGIN_LOCKOUT_MINUTES = 15;
+
 function attempt_login(string $email, string $password): bool
 {
     $pdo = db();
@@ -90,13 +93,40 @@ function attempt_login(string $email, string $password): bool
     if (!$user || $user['status'] !== 'active') {
         return false;
     }
-    if (!password_verify($password, $user['password_hash'])) {
+
+    if ($user['locked_until'] && strtotime($user['locked_until']) > time()) {
         return false;
+    }
+
+    if (!password_verify($password, $user['password_hash'])) {
+        register_failed_login($user['id'], (int)$user['failed_login_count']);
+        return false;
+    }
+
+    if ($user['failed_login_count'] > 0 || $user['locked_until']) {
+        $pdo->prepare('UPDATE users SET failed_login_count = 0, locked_until = NULL WHERE id = ?')
+            ->execute([$user['id']]);
     }
 
     session_regenerate_id(true);
     $_SESSION['user_id'] = $user['id'];
     return true;
+}
+
+function register_failed_login(string $userId, int $currentCount): void
+{
+    $newCount = $currentCount + 1;
+    $pdo = db();
+
+    if ($newCount >= LOGIN_MAX_ATTEMPTS) {
+        $lockedUntil = date('Y-m-d H:i:s', time() + LOGIN_LOCKOUT_MINUTES * 60);
+        $pdo->prepare('UPDATE users SET failed_login_count = 0, locked_until = ? WHERE id = ?')
+            ->execute([$lockedUntil, $userId]);
+        return;
+    }
+
+    $pdo->prepare('UPDATE users SET failed_login_count = ? WHERE id = ?')
+        ->execute([$newCount, $userId]);
 }
 
 function logout_user(): void

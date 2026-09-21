@@ -13,6 +13,8 @@ CREATE TABLE IF NOT EXISTS users (
   status VARCHAR(20) NOT NULL DEFAULT 'active',
   is_admin TINYINT(1) NOT NULL DEFAULT 0,
   terms_accepted_at DATETIME NOT NULL,
+  failed_login_count INT NOT NULL DEFAULT 0,
+  locked_until DATETIME NULL,
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 

@@ -69,6 +69,11 @@ templates/                                      → cabeçalho/rodapé HTML reap
   PHP — funciona nos planos cPanel comuns sem precisar configurar SMTP
   externo. A tela de pedido sempre mostra a mesma mensagem, exista ou não
   o e-mail, pra não revelar quais contas existem.
+- **Proteção contra força bruta**: 5 tentativas de login erradas seguidas
+  travam a conta por 15 minutos (`users.failed_login_count`,
+  `users.locked_until`). A mensagem de erro é sempre a mesma genérica
+  ("E-mail ou senha inválidos"), com ou sem bloqueio ativo, pra não
+  revelar o estado da conta a quem está tentando adivinhar a senha.
 
 Toda foto enviada também passa por `app/helpers.php::reencode_photo_stripping_metadata()`:
 via GD, é redimensionada (máx. 1600px no lado maior) e regravada — o que
