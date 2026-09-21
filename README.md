@@ -49,15 +49,19 @@ templates/                                      → cabeçalho/rodapé HTML reap
   Nenhuma conta é admin por padrão — veja "Promovendo o primeiro
   administrador" abaixo.
 
+Toda foto enviada também passa por `app/helpers.php::reencode_photo_stripping_metadata()`:
+via GD, é redimensionada (máx. 1600px no lado maior) e regravada — o que
+descarta automaticamente metadados EXIF, incluindo geolocalização, já que o
+GD nunca copia esses dados ao regravar a imagem. Se a extensão `gd` não
+estiver disponível no host, o upload cai de volta a salvar o arquivo original
+sem reprocessar (a app não quebra, só perde essa otimização).
+
 ## O que falta (próximos passos naturais)
 
 - **Cobrança recorrente** (ex.: Mercado Pago, mais comum no Brasil que
   Stripe): a página `planos.php` já mostra a comparação Livre × Exclusivo,
   falta ligar o botão "Assinar" a um checkout de verdade que, via webhook,
   atualize `users.plan` e `users.plan_valid_until`.
-- **Redimensionar/otimizar imagens no upload** (a extensão `gd` do PHP,
-  presente na maioria dos planos cPanel, permite isso) para não depender
-  do tamanho enviado pelo usuário.
 - Nota de segurança: como as fotos ficam em `uploads/photos/` com nome
   aleatório mas publicamente servidas pelo Apache, uma foto "só amigos"
   não aparece pra quem não é amigo pela interface — mas quem descobrir a

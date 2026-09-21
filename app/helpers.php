@@ -72,6 +72,61 @@ const ALLOWED_PHOTO_TYPES = [
     'image/webp' => 'webp',
 ];
 
+const MAX_PHOTO_DIMENSION = 1600;
+
+/**
+ * Redimensiona (se maior que MAX_PHOTO_DIMENSION) e regrava a imagem via GD.
+ * Isso também descarta metadados EXIF (incluindo geolocalização), já que o
+ * GD nunca copia esses dados ao regravar — importante numa rede social onde
+ * uma foto pode revelar sem querer onde a pessoa mora ou está.
+ * Retorna true se conseguiu gravar em $destPath; false se a extensão GD não
+ * está disponível ou a imagem não pôde ser lida (o chamador deve then usar
+ * o arquivo original como está).
+ */
+function reencode_photo_stripping_metadata(string $srcPath, string $mime, string $destPath): bool
+{
+    if (!function_exists('imagecreatefromjpeg')) {
+        return false;
+    }
+
+    $image = match ($mime) {
+        'image/jpeg' => @imagecreatefromjpeg($srcPath),
+        'image/png' => @imagecreatefrompng($srcPath),
+        'image/webp' => function_exists('imagecreatefromwebp') ? @imagecreatefromwebp($srcPath) : false,
+        default => false,
+    };
+    if (!$image) {
+        return false;
+    }
+
+    $width = imagesx($image);
+    $height = imagesy($image);
+    $maxSide = max($width, $height);
+
+    if ($maxSide > MAX_PHOTO_DIMENSION) {
+        $scale = MAX_PHOTO_DIMENSION / $maxSide;
+        $resized = imagescale($image, (int)round($width * $scale), (int)round($height * $scale));
+        if ($resized !== false) {
+            imagedestroy($image);
+            $image = $resized;
+        }
+    }
+
+    if ($mime === 'image/png') {
+        imagesavealpha($image, true);
+    }
+
+    $ok = match ($mime) {
+        'image/jpeg' => imagejpeg($image, $destPath, 85),
+        'image/png' => imagepng($image, $destPath, 6),
+        'image/webp' => function_exists('imagewebp') ? imagewebp($image, $destPath, 85) : false,
+        default => false,
+    };
+
+    imagedestroy($image);
+    return $ok;
+}
+
 /**
  * Valida e move um upload de foto para uploads/photos, com nome aleatório.
  * Retorna o caminho relativo salvo no banco, ou lança RuntimeException.
@@ -103,7 +158,9 @@ function save_uploaded_photo(array $file): string
     }
 
     $dest = $destDir . '/' . $filename;
-    if (!move_uploaded_file($file['tmp_name'], $dest)) {
+
+    $reencoded = reencode_photo_stripping_metadata($file['tmp_name'], $mime, $dest);
+    if (!$reencoded && !move_uploaded_file($file['tmp_name'], $dest)) {
         throw new RuntimeException('Não foi possível salvar o arquivo.');
     }
 
