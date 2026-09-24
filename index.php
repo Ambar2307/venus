@@ -4,7 +4,7 @@ require_once __DIR__ . '/app/bootstrap.php';
 $currentUser = current_user();
 $fotos = fetch_feed($currentUser['id'] ?? null);
 
-$pageTitle = 'Feed — Reserva';
+$pageTitle = 'Feed — Clube do Swing';
 $activePage = 'feed';
 require __DIR__ . '/templates/header.php';
 ?>

@@ -2,7 +2,7 @@
 require_once __DIR__ . '/app/bootstrap.php';
 
 $currentUser = current_user();
-$pageTitle = 'Termos de Uso — Reserva';
+$pageTitle = 'Termos de Uso — Clube do Swing';
 require __DIR__ . '/templates/header.php';
 ?>
 
@@ -11,7 +11,7 @@ require __DIR__ . '/templates/header.php';
 
 <div class="text-sm" style="display:flex;flex-direction:column;gap:1rem;max-width:640px">
   <p>
-    O Reserva é uma plataforma para maiores de 18 anos, voltada a casais e
+    O Clube do Swing é uma plataforma para maiores de 18 anos, voltada a casais e
     solteiros(as) que queiram se conhecer, trocar fotos e conversar. Ao criar
     um perfil, você concorda com estes termos.
   </p>

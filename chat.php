@@ -3,7 +3,7 @@ require_once __DIR__ . '/app/bootstrap.php';
 
 $currentUser = require_login_page();
 
-$pageTitle = 'Chat — Reserva';
+$pageTitle = 'Chat — Clube do Swing';
 $activePage = 'chat';
 require __DIR__ . '/templates/header.php';
 

@@ -38,7 +38,7 @@ $stmt = db()->prepare(
 $stmt->execute();
 $denuncias = $stmt->fetchAll();
 
-$pageTitle = 'Moderação — Reserva';
+$pageTitle = 'Moderação — Clube do Swing';
 $activePage = 'moderacao';
 require __DIR__ . '/../templates/header.php';
 ?>
@@ -75,7 +75,7 @@ require __DIR__ . '/../templates/header.php';
           <button class="btn btn-sm" data-report-resolve-btn data-report-id="<?= e($rep['id']) ?>" data-action="remove_photo">
             Remover foto
           </button>
-          <button class="btn btn-ghost btn-sm" style="border-color:#5a2733;color:#e08a9c"
+          <button class="btn btn-ghost btn-sm btn-danger"
                   data-user-status-btn data-user-id="<?= e($rep['reported_user_id']) ?>" data-status="suspended">
             Suspender autor
           </button>

@@ -26,7 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-$pageTitle = 'Redefinir senha — Reserva';
+$pageTitle = 'Redefinir senha — Clube do Swing';
 require __DIR__ . '/templates/header.php';
 ?>
 

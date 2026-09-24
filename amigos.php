@@ -26,7 +26,7 @@ if ($busca !== '') {
     $resultados = $stmt->fetchAll();
 }
 
-$pageTitle = 'Amigos — Reserva';
+$pageTitle = 'Amigos — Clube do Swing';
 $activePage = 'amigos';
 require __DIR__ . '/templates/header.php';
 ?>

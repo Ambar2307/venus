@@ -22,7 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-$pageTitle = 'Recuperar senha — Reserva';
+$pageTitle = 'Recuperar senha — Clube do Swing';
 $activePage = 'login';
 require __DIR__ . '/templates/header.php';
 ?>
@@ -31,7 +31,7 @@ require __DIR__ . '/templates/header.php';
 
 <?php if ($enviado): ?>
   <p class="notice" style="max-width:360px">
-    Se esse e-mail tiver uma conta no Reserva, enviamos um link para redefinir a
+    Se esse e-mail tiver uma conta no Clube do Swing, enviamos um link para redefinir a
     senha. Confira sua caixa de entrada (e o spam).
   </p>
 <?php else: ?>

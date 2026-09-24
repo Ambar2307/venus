@@ -52,7 +52,7 @@ if ($temFiltro) {
 
 $seguindoIds = array_column(list_following($currentUser['id']), 'id');
 
-$pageTitle = 'Buscar — Reserva';
+$pageTitle = 'Buscar — Clube do Swing';
 $activePage = 'buscar';
 require __DIR__ . '/templates/header.php';
 ?>

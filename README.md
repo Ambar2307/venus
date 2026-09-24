@@ -1,4 +1,4 @@
-# Reserva
+# Clube do Swing
 
 Rede social de encontros para casais e solteiros(as): feed de fotos com
 visibilidade pública ou só-para-amigos, curtidas e comentários limitados no

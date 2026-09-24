@@ -184,14 +184,14 @@ function current_base_url(): string
  */
 function send_password_reset_email(string $toEmail, string $displayName, string $resetUrl): void
 {
-    $subject = 'Redefinir sua senha — Reserva';
+    $subject = 'Redefinir sua senha — Clube do Swing';
     $body = "Olá, {$displayName}.\n\n"
-        . "Pediram a redefinição da senha da sua conta no Reserva. Se foi você, "
+        . "Pediram a redefinição da senha da sua conta no Clube do Swing. Se foi você, "
         . "clique no link abaixo (válido por " . PASSWORD_RESET_TTL_MINUTES . " minutos):\n\n"
         . $resetUrl . "\n\n"
         . "Se você não pediu isso, pode ignorar este e-mail — sua senha continua a mesma.\n";
 
-    $headers = "From: Reserva <no-reply@" . preg_replace('/^www\./', '', $_SERVER['HTTP_HOST'] ?? 'localhost') . ">\r\n"
+    $headers = "From: Clube do Swing <no-reply@" . preg_replace('/^www\./', '', $_SERVER['HTTP_HOST'] ?? 'localhost') . ">\r\n"
         . "Content-Type: text/plain; charset=utf-8";
 
     @mail($toEmail, $subject, $body, $headers);

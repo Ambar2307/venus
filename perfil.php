@@ -84,7 +84,7 @@ if ($isOwnProfile) {
     $seguindo = is_following($currentUser['id'], $profile['id']);
 }
 
-$pageTitle = $profile['display_name'] . ' — Reserva';
+$pageTitle = $profile['display_name'] . ' — Clube do Swing';
 $activePage = 'perfil';
 require __DIR__ . '/templates/header.php';
 ?>
@@ -95,7 +95,7 @@ require __DIR__ . '/templates/header.php';
     <div style="flex:1">
       <h1 class="font-serif" style="margin-bottom:.25rem"><?= e($profile['display_name']) ?></h1>
       <div class="text-sm text-muted"><?= e($tipo) ?> · Interesse: <?= e($profile['interest'] ?: '—') ?></div>
-      <div class="text-xs text-muted">No Reserva desde <?= e($desde) ?></div>
+      <div class="text-xs text-muted">No Clube do Swing desde <?= e($desde) ?></div>
       <?php if ($isOwnProfile && is_exclusive($profile)): ?>
         <span class="badge badge-gold" style="margin-top:.5rem;display:inline-block">Exclusivo</span>
       <?php endif; ?>
@@ -176,7 +176,7 @@ require __DIR__ . '/templates/header.php';
               <?php if ($foto['visibility'] === 'FRIENDS'): ?>
                 <span class="badge">Só amigos</span>
               <?php endif; ?>
-              <button class="btn btn-ghost btn-sm" style="margin-left:auto;border-color:#5a2733;color:#e08a9c"
+              <button class="btn btn-ghost btn-sm btn-danger" style="margin-left:auto"
                       data-delete-photo-btn data-photo-id="<?= e($foto['id']) ?>">
                 Excluir
               </button>
@@ -250,7 +250,7 @@ require __DIR__ . '/templates/header.php';
     <?php endif; ?>
   </div>
 
-  <div class="card" style="padding:1.5rem;margin-top:2.5rem;border-color:#5a2733">
+  <div class="card card-danger" style="padding:1.5rem;margin-top:2.5rem">
     <h3 class="text-sm text-wine" style="margin-bottom:.5rem">Excluir conta</h3>
     <p class="text-xs text-muted" style="margin-bottom:1rem">
       Remove permanentemente seu perfil, fotos, comentários, curtidas, amizades e
@@ -259,7 +259,7 @@ require __DIR__ . '/templates/header.php';
     </p>
     <form data-delete-account-form style="display:flex;gap:.5rem;flex-wrap:wrap">
       <input class="input" type="password" name="password" placeholder="Confirme sua senha" required style="max-width:220px">
-      <button type="submit" class="btn btn-ghost btn-sm" style="border-color:#5a2733;color:#e08a9c">
+      <button type="submit" class="btn btn-ghost btn-sm btn-danger">
         Excluir minha conta
       </button>
     </form>

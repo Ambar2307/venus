@@ -8,14 +8,20 @@ $activePage = $activePage ?? '';
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title><?= e($pageTitle ?? 'Reserva') ?></title>
+  <title><?= e($pageTitle ?? 'Clube do Swing') ?></title>
   <meta name="csrf-token" content="<?= e(csrf_token()) ?>">
   <link rel="stylesheet" href="/assets/css/style.css">
 </head>
 <body data-user-id="<?= e($currentUser['id'] ?? '') ?>">
 <div class="layout">
   <aside class="sidebar">
-    <a href="/index.php" class="brand">Reserva</a>
+    <a href="/index.php" class="brand">
+      <svg width="26" height="26" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <circle cx="10" cy="14" r="8.5" stroke="#a9782f" stroke-width="1.7"/>
+        <circle cx="18" cy="14" r="8.5" stroke="#8a3f52" stroke-width="1.7"/>
+      </svg>
+      <span>Clube do Swing</span>
+    </a>
     <nav class="nav-links">
       <a href="/index.php" class="<?= $activePage === 'feed' ? 'active' : '' ?>">Feed</a>
       <?php if ($currentUser): ?>

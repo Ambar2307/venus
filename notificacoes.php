@@ -6,7 +6,7 @@ $currentUser = require_login_page();
 $notificacoes = list_notifications($currentUser['id']);
 mark_all_notifications_read($currentUser['id']);
 
-$pageTitle = 'Notificações — Reserva';
+$pageTitle = 'Notificações — Clube do Swing';
 $activePage = 'notificacoes';
 require __DIR__ . '/templates/header.php';
 ?>

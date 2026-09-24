@@ -2,7 +2,7 @@
 require_once __DIR__ . '/app/bootstrap.php';
 
 $currentUser = current_user();
-$pageTitle = 'Política de Privacidade — Reserva';
+$pageTitle = 'Política de Privacidade — Clube do Swing';
 require __DIR__ . '/templates/header.php';
 ?>
 
@@ -11,7 +11,7 @@ require __DIR__ . '/templates/header.php';
 
 <div class="text-sm" style="display:flex;flex-direction:column;gap:1rem;max-width:640px">
   <p>
-    Esta política explica quais dados o Reserva coleta, para que servem, e
+    Esta política explica quais dados o Clube do Swing coleta, para que servem, e
     quais são seus direitos, em linha com a Lei Geral de Proteção de Dados
     (LGPD).
   </p>
