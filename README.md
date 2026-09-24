@@ -38,6 +38,8 @@ templates/                                      → cabeçalho/rodapé HTML reap
   precisam rodar `database/migrations/2026_09_21_add_signup_fields.sql`.
 - Feed com fotos aprovadas por moderação (`moderation_status`); toda foto nova
   entra como `PENDING` até ser aprovada manualmente no banco.
+- **Filtro do feed**: abas "Todos" / "Do meu estado" / "Quem eu sigo" logo
+  abaixo do título, só para quem está logado (`app/photos.php::fetch_feed()`).
 - Visibilidade "só amigos": a URL da foto só é enviada ao navegador se o
   `viewer` for o dono ou amigo aceito (`app/friends.php`) — checado sempre no
   servidor, nunca confiando no cliente.
