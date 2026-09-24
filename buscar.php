@@ -50,6 +50,7 @@ if ($temFiltro) {
     $resultados = $stmt->fetchAll();
 }
 
+$miniaturas = fetch_profile_thumbnails(array_column($resultados, 'id'));
 $seguindoIds = array_column(list_following($currentUser['id']), 'id');
 
 $pageTitle = 'Buscar — Clube do Swing';
@@ -106,27 +107,36 @@ require __DIR__ . '/templates/header.php';
 </form>
 
 <?php if ($temFiltro): ?>
-  <h3 class="text-sm">Resultados (<?= count($resultados) ?>)</h3>
-  <div class="card">
+  <h3 class="text-sm" style="margin-bottom:.75rem">Resultados (<?= count($resultados) ?>)</h3>
+  <div class="search-grid">
     <?php foreach ($resultados as $r): ?>
-      <div class="friend-row">
-        <a href="/perfil.php?id=<?= e($r['id']) ?>" class="text-sm">
-          <?= e($r['display_name']) ?>
-          <span class="text-xs text-muted">
-            <?= e(PROFILE_TYPE_LABEL[$r['type']] ?? '') ?> · <?= (int)$r['idade'] ?> anos ·
-            <?= e($r['city']) ?>/<?= e($r['state']) ?>
-            <?php if ($r['interest']): ?> · <?= e($r['interest']) ?><?php endif; ?>
-          </span>
+      <?php $jaSegue = in_array($r['id'], $seguindoIds, true); ?>
+      <div class="search-card">
+        <a href="/perfil.php?id=<?= e($r['id']) ?>" class="search-card-photo">
+          <?php if (isset($miniaturas[$r['id']])): ?>
+            <img src="/photo.php?id=<?= e($miniaturas[$r['id']]) ?>" alt="Foto de <?= e($r['display_name']) ?>">
+          <?php else: ?>
+            <div class="search-card-noimg"><?= e(initials($r['display_name'])) ?></div>
+          <?php endif; ?>
         </a>
-        <?php $jaSegue = in_array($r['id'], $seguindoIds, true); ?>
-        <button
-          class="btn btn-sm <?= $jaSegue ? 'btn-ghost' : 'btn-outline' ?>"
-          data-follow-btn data-user-id="<?= e($r['id']) ?>" data-following="<?= $jaSegue ? '1' : '0' ?>"
-        ><?= $jaSegue ? 'Deixar de seguir' : 'Seguir' ?></button>
+        <div class="search-card-body">
+          <a href="/perfil.php?id=<?= e($r['id']) ?>" class="text-sm" style="font-weight:600"><?= e($r['display_name']) ?></a>
+          <div class="text-xs text-muted">
+            <?= e(PROFILE_TYPE_LABEL[$r['type']] ?? '') ?> · <?= (int)$r['idade'] ?> anos
+          </div>
+          <div class="text-xs text-muted"><?= e($r['city']) ?>/<?= e($r['state']) ?></div>
+          <?php if ($r['interest']): ?>
+            <div class="text-xs text-muted"><?= e($r['interest']) ?></div>
+          <?php endif; ?>
+          <button
+            class="btn btn-sm <?= $jaSegue ? 'btn-ghost' : 'btn-outline' ?>" style="margin-top:.5rem;width:100%"
+            data-follow-btn data-user-id="<?= e($r['id']) ?>" data-following="<?= $jaSegue ? '1' : '0' ?>"
+          ><?= $jaSegue ? 'Deixar de seguir' : 'Seguir' ?></button>
+        </div>
       </div>
     <?php endforeach; ?>
     <?php if (!$resultados): ?>
-      <div class="friend-row"><span class="text-sm text-muted">Nenhum perfil encontrado com esses filtros.</span></div>
+      <p class="text-sm text-muted">Nenhum perfil encontrado com esses filtros.</p>
     <?php endif; ?>
   </div>
 <?php else: ?>

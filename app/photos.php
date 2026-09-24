@@ -51,6 +51,33 @@ function delete_comment(string $commentId): void
     }
 }
 
+/**
+ * Para uma lista de ids de usuário, retorna [user_id => photo_id] com a foto
+ * pública aprovada mais recente de cada um (usada como miniatura em listagens
+ * como a busca). Usuários sem foto pública simplesmente não aparecem no mapa.
+ */
+function fetch_profile_thumbnails(array $userIds): array
+{
+    if (!$userIds) {
+        return [];
+    }
+    $placeholders = implode(',', array_fill(0, count($userIds), '?'));
+    $stmt = db()->prepare(
+        "SELECT user_id, id FROM photos
+         WHERE user_id IN ($placeholders) AND visibility = 'PUBLIC' AND moderation_status = 'APPROVED'
+         ORDER BY created_at DESC"
+    );
+    $stmt->execute($userIds);
+
+    $thumbs = [];
+    foreach ($stmt->fetchAll() as $row) {
+        if (!isset($thumbs[$row['user_id']])) {
+            $thumbs[$row['user_id']] = $row['id'];
+        }
+    }
+    return $thumbs;
+}
+
 /** Todas as fotos (qualquer status de moderação) do próprio usuário, mais recentes primeiro. */
 function fetch_own_photos(string $userId): array
 {

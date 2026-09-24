@@ -418,6 +418,74 @@ textarea.input {
   background: rgba(255, 255, 255, .92);
 }
 
+.search-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+
+@media (max-width: 640px) {
+  .search-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.search-card {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  border-radius: .75rem;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  transition: transform .18s ease, border-color .18s ease;
+}
+
+.search-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(169, 120, 47, .35);
+}
+
+.search-card-photo {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  background: var(--surface-2);
+  overflow: hidden;
+}
+
+.search-card-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform .2s ease;
+}
+
+.search-card:hover .search-card-photo img {
+  transform: scale(1.05);
+}
+
+.search-card-noimg {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--gold), var(--wine));
+  color: #1a1410;
+  font-family: Georgia, serif;
+  font-weight: 600;
+  font-size: 1.5rem;
+}
+
+.search-card-body {
+  padding: .75rem;
+  display: flex;
+  flex-direction: column;
+  gap: .15rem;
+}
+
 .photo-lock {
   position: absolute;
   inset: 0;
