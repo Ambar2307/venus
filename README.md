@@ -153,9 +153,11 @@ sem reprocessar (a app não quebra, só perde essa otimização).
   priorizando perfis da mesma cidade (`app/social.php::list_recommended_profiles()`).
 - **Buscar** (`buscar.php`): filtro por tipo de perfil (casal/mulher
   solteira/homem solteiro), UF + cidade (select em cascata), interesse e
-  faixa de idade, combináveis; cada resultado mostra a idade aproximada e
-  o botão de seguir já refletindo se o usuário logado já segue aquele
-  perfil ou não.
+  faixa de idade, combináveis. Resultados em grade de cards com foto
+  em miniatura — 4 por linha no desktop, 2 no celular, sem limite
+  vertical (`app/photos.php::fetch_profile_thumbnails()` busca as
+  fotos de capa em lote); cada card mostra idade aproximada e o botão
+  de seguir já refletindo se o usuário logado já segue aquele perfil.
 - **Cidades do Brasil por estado**: tanto o cadastro quanto a busca usam
   um select de UF que carrega a lista de cidades daquele estado via
   `api/cities.php?uf=XX` (fetch, sem recarregar a página) — lista
