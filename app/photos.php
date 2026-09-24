@@ -41,6 +41,16 @@ function delete_photo(string $userId, string $photoId): void
     }
 }
 
+/** Exclui um comentário (uso administrativo — a permissão é checada por quem chama). */
+function delete_comment(string $commentId): void
+{
+    $stmt = db()->prepare('DELETE FROM comments WHERE id = ?');
+    $stmt->execute([$commentId]);
+    if ($stmt->rowCount() === 0) {
+        throw new RuntimeException('Comentário não encontrado.');
+    }
+}
+
 /** Todas as fotos (qualquer status de moderação) do próprio usuário, mais recentes primeiro. */
 function fetch_own_photos(string $userId): array
 {
@@ -80,7 +90,7 @@ function fetch_feed(?string $viewerId, int $limit = 30): array
     }
 
     $commentsStmt = db()->prepare(
-        "SELECT c.photo_id, c.body, pr.display_name
+        "SELECT c.id, c.photo_id, c.body, pr.display_name
          FROM comments c
          JOIN profiles pr ON pr.user_id = c.user_id
          WHERE c.photo_id IN ($placeholders)

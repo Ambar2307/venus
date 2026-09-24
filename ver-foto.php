@@ -39,7 +39,7 @@ $likes = array_column($likesStmt->fetchAll(), 'user_id');
 $curtidoPeloViewer = $viewerId ? in_array($viewerId, $likes, true) : false;
 
 $commentsStmt = db()->prepare(
-    "SELECT c.body, pr.display_name
+    "SELECT c.id, c.body, pr.display_name
      FROM comments c JOIN profiles pr ON pr.user_id = c.user_id
      WHERE c.photo_id = ? ORDER BY c.created_at ASC"
 );
@@ -91,7 +91,12 @@ require __DIR__ . '/templates/header.php';
 
     <div class="comment-list" data-comment-list>
       <?php foreach ($comentarios as $c): ?>
-        <div><strong><?= e($c['display_name']) ?>:</strong> <?= e($c['body']) ?></div>
+        <div data-comment-row="<?= e($c['id']) ?>">
+          <strong><?= e($c['display_name']) ?>:</strong> <?= e($c['body']) ?>
+          <?php if ($currentUser && is_admin($currentUser)): ?>
+            <button type="button" class="comment-delete-btn" data-comment-delete-btn data-comment-id="<?= e($c['id']) ?>" title="Excluir comentário (admin)">✕</button>
+          <?php endif; ?>
+        </div>
       <?php endforeach; ?>
     </div>
 

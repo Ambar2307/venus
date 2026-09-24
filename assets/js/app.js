@@ -67,10 +67,21 @@
           var list = article ? article.querySelector("[data-comment-list]") : null;
           if (list) {
             var div = document.createElement("div");
+            div.setAttribute("data-comment-row", res.id);
             var strong = document.createElement("strong");
             strong.textContent = res.autor + ": ";
             div.appendChild(strong);
             div.appendChild(document.createTextNode(res.texto));
+            if (document.body.getAttribute("data-is-admin") === "1") {
+              var delBtn = document.createElement("button");
+              delBtn.type = "button";
+              delBtn.className = "comment-delete-btn";
+              delBtn.setAttribute("data-comment-delete-btn", "");
+              delBtn.setAttribute("data-comment-id", res.id);
+              delBtn.title = "Excluir comentário (admin)";
+              delBtn.textContent = "✕";
+              div.appendChild(delBtn);
+            }
             list.appendChild(div);
           }
           var countEl = article ? article.querySelector("[data-comment-count]") : null;
@@ -127,6 +138,26 @@
         })
         .catch(handleError);
     });
+  });
+
+  // --- Excluir comentário (admin) — delegado, funciona também em comentários
+  // adicionados na hora (sem reload), que não existiam quando a página carregou.
+  document.addEventListener("click", function (ev) {
+    var btn = ev.target.closest("[data-comment-delete-btn]");
+    if (!btn) return;
+    if (!confirm("Excluir este comentário? Não pode ser desfeito.")) return;
+    var commentId = btn.getAttribute("data-comment-id");
+    postJSON("/api/comment_delete.php", { comment_id: commentId })
+      .then(function () {
+        var row = document.querySelector('[data-comment-row="' + commentId + '"]');
+        var article = row ? row.closest("article[data-photo-id]") : null;
+        if (row) row.remove();
+        var countEl = article ? article.querySelector("[data-comment-count]") : null;
+        if (countEl) {
+          countEl.textContent = String(Math.max(0, parseInt(countEl.textContent, 10) - 1));
+        }
+      })
+      .catch(handleError);
   });
 
   // --- Denunciar foto ---

@@ -12,7 +12,7 @@ $activePage = $activePage ?? '';
   <meta name="csrf-token" content="<?= e(csrf_token()) ?>">
   <link rel="stylesheet" href="/assets/css/style.css">
 </head>
-<body data-user-id="<?= e($currentUser['id'] ?? '') ?>">
+<body data-user-id="<?= e($currentUser['id'] ?? '') ?>" data-is-admin="<?= ($currentUser && is_admin($currentUser)) ? '1' : '0' ?>">
 <div class="layout">
   <aside class="sidebar">
     <a href="/index.php" class="brand">

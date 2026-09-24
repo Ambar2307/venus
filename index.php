@@ -73,7 +73,12 @@ require __DIR__ . '/templates/header.php';
 
         <div class="comment-list" data-comment-list>
           <?php foreach ($foto['comentarios'] as $c): ?>
-            <div><strong><?= e($c['display_name']) ?>:</strong> <?= e($c['body']) ?></div>
+            <div data-comment-row="<?= e($c['id']) ?>">
+              <strong><?= e($c['display_name']) ?>:</strong> <?= e($c['body']) ?>
+              <?php if ($currentUser && is_admin($currentUser)): ?>
+                <button type="button" class="comment-delete-btn" data-comment-delete-btn data-comment-id="<?= e($c['id']) ?>" title="Excluir comentário (admin)">✕</button>
+              <?php endif; ?>
+            </div>
           <?php endforeach; ?>
         </div>
 

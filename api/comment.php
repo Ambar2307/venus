@@ -31,13 +31,15 @@ if (!$checagem['permitido']) {
     json_response(['erro' => $checagem['motivo'], 'upgrade' => true], 403);
 }
 
+$commentId = gen_uuid();
 $stmt = db()->prepare('INSERT INTO comments (id, user_id, photo_id, body) VALUES (?, ?, ?, ?)');
-$stmt->execute([gen_uuid(), $user['id'], $photoId, $text]);
+$stmt->execute([$commentId, $user['id'], $photoId, $text]);
 registrar_comentario($user['id']);
 create_notification($foto['user_id'], $user['id'], 'COMMENT', $photoId, mb_substr($text, 0, 140));
 
 json_response([
     'ok' => true,
+    'id' => $commentId,
     'autor' => $user['display_name'],
     'texto' => $text,
 ]);

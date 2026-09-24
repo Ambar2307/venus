@@ -24,7 +24,14 @@ if (!$profile) {
 }
 
 $isOwnProfile = $profile['id'] === $currentUser['id'];
-$amigos = $isOwnProfile ? true : sao_amigos($currentUser['id'], $profile['id']);
+$previewMode = $isOwnProfile && isset($_GET['preview']);
+$showAsVisitor = !$isOwnProfile || $previewMode;
+
+if ($previewMode) {
+    $amigos = false; // simula a visão de quem NÃO é seu amigo
+} else {
+    $amigos = $isOwnProfile ? true : sao_amigos($currentUser['id'], $profile['id']);
+}
 $erroUpload = null;
 
 if (!$isOwnProfile) {
@@ -67,7 +74,7 @@ if ($isOwnProfile && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['publ
 $tipo = PROFILE_TYPE_LABEL[$profile['type']] ?? '';
 $desde = date('m/Y', strtotime($profile['created_at']));
 
-if ($isOwnProfile) {
+if ($isOwnProfile && !$previewMode) {
     $minhasFotos = fetch_own_photos($currentUser['id']);
     $meusAmigos = list_friends($currentUser['id']);
     $meusSeguidores = list_followers($currentUser['id']);
@@ -94,9 +101,16 @@ $activePage = 'perfil';
 require __DIR__ . '/templates/header.php';
 ?>
 
-<?php if (!$isOwnProfile && $fotoDestaque): ?>
+<?php if ($previewMode): ?>
+  <div class="notice" style="margin-bottom:1.5rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap">
+    <span>👁️ Você está vendo seu perfil como um visitante que não é seu amigo vê.</span>
+    <a href="/perfil.php" class="btn btn-sm">Voltar a editar meu perfil</a>
+  </div>
+<?php endif; ?>
+
+<?php if ($showAsVisitor && $fotoDestaque): ?>
   <a href="/ver-foto.php?id=<?= e($fotoDestaque['id']) ?>" class="card" style="display:block;margin-bottom:1.5rem">
-    <div class="photo-media" style="width:100%;aspect-ratio:1/1;max-height:28rem">
+    <div class="photo-media" style="aspect-ratio:1/1;max-height:28rem">
       <img src="/photo.php?id=<?= e($fotoDestaque['id']) ?>" alt="Foto de <?= e($profile['display_name']) ?>">
     </div>
   </a>
@@ -116,6 +130,12 @@ require __DIR__ . '/templates/header.php';
   </div>
   <?php if ($profile['description']): ?>
     <p class="text-sm" style="margin-top:1rem"><?= nl2br(e($profile['description'])) ?></p>
+  <?php endif; ?>
+
+  <?php if ($isOwnProfile && !$previewMode): ?>
+    <div style="margin-top:1rem">
+      <a href="/perfil.php?preview=1" class="btn btn-outline btn-sm">Ver como terceiros veem meu perfil</a>
+    </div>
   <?php endif; ?>
 
   <?php if (!$isOwnProfile): ?>
@@ -143,7 +163,7 @@ require __DIR__ . '/templates/header.php';
   <?php endif; ?>
 </div>
 
-<?php if ($isOwnProfile): ?>
+<?php if ($isOwnProfile && !$previewMode): ?>
 
   <div class="tabs" style="flex-wrap:wrap">
     <button class="tab-btn active" data-tab-btn data-tab="minhas-fotos">Minhas fotos (<?= count($minhasFotos) ?>)</button>

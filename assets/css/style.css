@@ -356,6 +356,7 @@ textarea.input {
 }
 
 .photo-media {
+  width: 100%;
   aspect-ratio: 4 / 5;
   max-height: 32rem;
   border-radius: .75rem;
@@ -474,6 +475,20 @@ textarea.input {
   gap: .25rem;
   margin: .5rem 0;
   font-size: .82rem;
+}
+
+.comment-delete-btn {
+  background: none;
+  border: none;
+  color: var(--danger);
+  cursor: pointer;
+  font-size: .75rem;
+  padding: 0 .25rem;
+  opacity: .6;
+}
+
+.comment-delete-btn:hover {
+  opacity: 1;
 }
 
 .comment-form {
