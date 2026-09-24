@@ -105,6 +105,19 @@ sem reprocessar (a app não quebra, só perde essa otimização).
   "Rodando localmente") não lê `.htaccess` — esse bloqueio só é aplicado de
   fato por um servidor Apache de verdade, como o da Locaweb.
 
+- **Foto individual** (`ver-foto.php?id=...`): clicar em qualquer foto
+  (feed, perfil, notificações) abre essa página dedicada, com a mesma
+  identificação do autor, curtidas e comentários do card do feed —
+  mesma checagem de visibilidade do `photo.php` (pública, reservada aos
+  amigos, dono ou admin).
+- **Perfil de outra pessoa reformulado**: agora mostra a foto mais
+  recente visível em destaque no topo (tamanho grande), a identificação
+  (nome, tipo, interesse, descrição) logo abaixo com os botões de
+  amizade/seguir, e uma grade de miniaturas com todas as fotos do
+  usuário na parte inferior — fotos reservadas aparecem com cadeado
+  para quem não é amigo. Clicar em qualquer miniatura abre
+  `ver-foto.php`. A visão do próprio perfil ("Meu perfil", com as
+  abas) não muda.
 - **"Meu perfil" reorganizado**: o upload e a exclusão de fotos saíram do
   feed principal e agora vivem só na própria página de perfil
   (`perfil.php`, quando é o dono vendo o próprio perfil). Lá dentro há 5
