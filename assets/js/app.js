@@ -63,7 +63,7 @@
 
       postJSON("/api/comment.php", { photo_id: photoId, text: text })
         .then(function (res) {
-          var article = form.closest("[data-photo-id]");
+          var article = form.closest("article[data-photo-id]");
           var list = article ? article.querySelector("[data-comment-list]") : null;
           if (list) {
             var div = document.createElement("div");

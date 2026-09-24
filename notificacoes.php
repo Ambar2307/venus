@@ -17,9 +17,9 @@ require __DIR__ . '/templates/header.php';
   <?php foreach ($notificacoes as $n): ?>
     <div class="friend-row">
       <div style="display:flex;gap:.75rem;align-items:center">
-        <div class="photo-media" style="width:3rem;height:3rem;margin:0;flex-shrink:0">
+        <a href="/ver-foto.php?id=<?= e($n['photo_id']) ?>" class="photo-media" style="width:3rem;height:3rem;margin:0;flex-shrink:0;display:block">
           <img src="/photo.php?id=<?= e($n['photo_id']) ?>" alt="" style="width:100%;height:100%;object-fit:cover">
-        </div>
+        </a>
         <div class="text-sm">
           <strong><?= e($n['actor_name']) ?></strong>
           <?= $n['type'] === 'LIKE' ? 'curtiu sua foto.' : 'comentou: "' . e($n['comment_snippet']) . '"' ?>

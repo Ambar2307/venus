@@ -79,15 +79,28 @@ if ($isOwnProfile) {
     );
     $stmt->execute([$profile['id']]);
     $todasFotos = $stmt->fetchAll();
-    $fotosPublicas = array_values(array_filter($todasFotos, fn($f) => $f['visibility'] === 'PUBLIC'));
-    $fotosReservadas = array_values(array_filter($todasFotos, fn($f) => $f['visibility'] === 'FRIENDS'));
     $seguindo = is_following($currentUser['id'], $profile['id']);
+    $fotoDestaque = null;
+    foreach ($todasFotos as $f) {
+        if ($f['visibility'] === 'PUBLIC' || $amigos) {
+            $fotoDestaque = $f;
+            break;
+        }
+    }
 }
 
 $pageTitle = $profile['display_name'] . ' — Clube do Swing';
 $activePage = 'perfil';
 require __DIR__ . '/templates/header.php';
 ?>
+
+<?php if (!$isOwnProfile && $fotoDestaque): ?>
+  <a href="/ver-foto.php?id=<?= e($fotoDestaque['id']) ?>" class="card" style="display:block;margin-bottom:1.5rem">
+    <div class="photo-media" style="width:100%;aspect-ratio:1/1;max-height:28rem">
+      <img src="/photo.php?id=<?= e($fotoDestaque['id']) ?>" alt="Foto de <?= e($profile['display_name']) ?>">
+    </div>
+  </a>
+<?php endif; ?>
 
 <div class="card" style="padding:1.5rem;margin-bottom:1.5rem">
   <div style="display:flex;gap:1rem;align-items:flex-start">
@@ -160,9 +173,11 @@ require __DIR__ . '/templates/header.php';
     <div class="stack">
       <?php foreach ($minhasFotos as $foto): ?>
         <article class="card feed-card" data-my-photo="<?= e($foto['id']) ?>">
-          <div class="photo-media" style="margin-top:1rem">
-            <img src="/photo.php?id=<?= e($foto['id']) ?>" alt="">
-          </div>
+          <a href="/ver-foto.php?id=<?= e($foto['id']) ?>">
+            <div class="photo-media" style="margin-top:1rem">
+              <img src="/photo.php?id=<?= e($foto['id']) ?>" alt="">
+            </div>
+          </a>
           <div class="photo-body">
             <?php if ($foto['caption']): ?><p class="text-sm"><?= e($foto['caption']) ?></p><?php endif; ?>
             <div class="photo-actions">
@@ -267,30 +282,25 @@ require __DIR__ . '/templates/header.php';
 
 <?php else: ?>
 
-  <div class="tabs">
-    <button class="tab-btn active" data-tab-btn data-tab="publicas">Públicas (<?= count($fotosPublicas) ?>)</button>
-    <button class="tab-btn" data-tab-btn data-tab="reservadas">Reservadas aos amigos (<?= count($fotosReservadas) ?>)</button>
-  </div>
-
-  <div data-tab-panel="publicas" class="stack">
-    <?php foreach ($fotosPublicas as $foto): ?>
-      <div class="photo-media"><img src="/photo.php?id=<?= e($foto['id']) ?>" alt=""></div>
+  <h3 class="text-sm" style="margin-bottom:.75rem">Fotos (<?= count($todasFotos) ?>)</h3>
+  <div class="photo-grid">
+    <?php foreach ($todasFotos as $foto): ?>
+      <?php $podeVer = $foto['visibility'] === 'PUBLIC' || $amigos; ?>
+      <?php if ($podeVer): ?>
+        <a href="/ver-foto.php?id=<?= e($foto['id']) ?>" class="photo-grid-item">
+          <img src="/photo.php?id=<?= e($foto['id']) ?>" alt="Foto de <?= e($profile['display_name']) ?>">
+          <?php if ($foto['visibility'] === 'FRIENDS'): ?>
+            <span class="badge badge-gold photo-grid-badge">Amigos</span>
+          <?php endif; ?>
+        </a>
+      <?php else: ?>
+        <div class="photo-grid-item photo-grid-locked" title="Reservada aos amigos">🔒</div>
+      <?php endif; ?>
     <?php endforeach; ?>
-    <?php if (!$fotosPublicas): ?><p class="text-sm text-muted">Nenhuma foto pública.</p><?php endif; ?>
   </div>
-
-  <div data-tab-panel="reservadas" class="stack" style="display:none">
-    <?php foreach ($fotosReservadas as $foto): ?>
-      <div class="photo-media">
-        <?php if ($amigos): ?>
-          <img src="/photo.php?id=<?= e($foto['id']) ?>" alt="">
-        <?php else: ?>
-          <div class="photo-lock">🔒 Reservada aos amigos</div>
-        <?php endif; ?>
-      </div>
-    <?php endforeach; ?>
-    <?php if (!$fotosReservadas): ?><p class="text-sm text-muted">Nenhuma foto reservada.</p><?php endif; ?>
-  </div>
+  <?php if (!$todasFotos): ?>
+    <p class="text-sm text-muted">Nenhuma foto ainda.</p>
+  <?php endif; ?>
 
 <?php endif; ?>
 

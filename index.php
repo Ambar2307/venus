@@ -43,7 +43,9 @@ require __DIR__ . '/templates/header.php';
 
       <div class="photo-media">
         <?php if ($foto['visivel']): ?>
-          <img src="/photo.php?id=<?= e($foto['id']) ?>" alt="Foto de <?= e($foto['display_name']) ?>">
+          <a href="/ver-foto.php?id=<?= e($foto['id']) ?>">
+            <img src="/photo.php?id=<?= e($foto['id']) ?>" alt="Foto de <?= e($foto['display_name']) ?>">
+          </a>
         <?php else: ?>
           <div class="photo-lock">🔒 Reservada aos amigos</div>
         <?php endif; ?>
