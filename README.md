@@ -118,6 +118,16 @@ sem reprocessar (a app não quebra, só perde essa otimização).
   para quem não é amigo. Clicar em qualquer miniatura abre
   `ver-foto.php`. A visão do próprio perfil ("Meu perfil", com as
   abas) não muda.
+- **"Ver como terceiros veem meu perfil"**: botão em "Meu perfil" que
+  mostra exatamente a mesma tela (`perfil.php?preview=1`) que um
+  visitante que não é seu amigo veria — foto de destaque, identificação
+  e grade de miniaturas com fotos "só amigos" mostrando cadeado, sem as
+  abas/formulário de edição. Um aviso no topo indica o modo de
+  visualização, com botão para voltar.
+- **Administradores podem excluir comentários**: um "✕" aparece ao
+  lado de cada comentário (feed e foto individual) só para quem tem
+  `is_admin=1` — `api/comment_delete.php` (POST, CSRF,
+  `require_admin_api()`) e `app/photos.php::delete_comment()`.
 - **"Meu perfil" reorganizado**: o upload e a exclusão de fotos saíram do
   feed principal e agora vivem só na própria página de perfil
   (`perfil.php`, quando é o dono vendo o próprio perfil). Lá dentro há 5
