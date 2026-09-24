@@ -521,3 +521,22 @@ textarea.input {
   display: flex;
   gap: .5rem;
 }
+
+.auth-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+}
+
+.auth-box {
+  width: 100%;
+  max-width: 360px;
+  text-align: center;
+}
+
+.auth-box .form,
+.auth-box .notice,
+.auth-box p {
+  text-align: left;
+}
