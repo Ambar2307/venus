@@ -13,10 +13,10 @@ $activePage = $activePage ?? '';
   <link rel="stylesheet" href="/assets/css/style.css">
 </head>
 <body data-user-id="<?= e($currentUser['id'] ?? '') ?>">
-<nav class="top-nav">
-  <div class="container">
+<div class="layout">
+  <aside class="sidebar">
     <a href="/index.php" class="brand">Reserva</a>
-    <div class="nav-links">
+    <nav class="nav-links">
       <a href="/index.php" class="<?= $activePage === 'feed' ? 'active' : '' ?>">Feed</a>
       <?php if ($currentUser): ?>
         <a href="/buscar.php" class="<?= $activePage === 'buscar' ? 'active' : '' ?>">Buscar</a>
@@ -37,8 +37,7 @@ $activePage = $activePage ?? '';
         <a href="/login.php" class="<?= $activePage === 'login' ? 'active' : '' ?>">Entrar</a>
         <a href="/signup.php" class="<?= $activePage === 'signup' ? 'active' : '' ?>">Criar perfil</a>
       <?php endif; ?>
-    </div>
-  </div>
-</nav>
-<main class="page">
-  <div class="container">
+    </nav>
+  </aside>
+  <main class="page">
+    <div class="container">

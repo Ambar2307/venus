@@ -45,21 +45,23 @@ a {
   padding: 0 1rem;
 }
 
-.top-nav {
+.layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.sidebar {
   border-bottom: 1px solid var(--border);
   background: rgba(21, 18, 27, 0.9);
   position: sticky;
   top: 0;
   z-index: 10;
-}
-
-.top-nav .container {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding-top: .75rem;
-  padding-bottom: .75rem;
-  max-width: 640px;
+  gap: 1.25rem;
+  padding: .75rem 1rem;
+  overflow-x: auto;
 }
 
 .brand {
@@ -68,12 +70,14 @@ a {
   letter-spacing: .04em;
   color: var(--gold);
   text-decoration: none;
+  flex-shrink: 0;
 }
 
 .nav-links {
   display: flex;
   gap: 1rem;
   font-size: .85rem;
+  white-space: nowrap;
 }
 
 .nav-links a {
@@ -88,6 +92,41 @@ a {
 
 .page {
   padding: 2rem 0 4rem;
+  flex: 1;
+  min-width: 0;
+}
+
+@media (min-width: 860px) {
+  .layout {
+    flex-direction: row;
+  }
+
+  .sidebar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2rem;
+    width: 220px;
+    flex-shrink: 0;
+    height: 100vh;
+    border-bottom: none;
+    border-right: 1px solid var(--border);
+    padding: 1.5rem 1.25rem;
+    overflow-x: visible;
+  }
+
+  .nav-links {
+    flex-direction: column;
+    gap: .85rem;
+    white-space: normal;
+  }
+
+  .page {
+    padding: 2.5rem 0 4rem;
+  }
+
+  .page .container {
+    margin: 0 0 0 2rem;
+  }
 }
 
 .card {
