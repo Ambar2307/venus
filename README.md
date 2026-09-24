@@ -129,9 +129,22 @@ sem reprocessar (a app não quebra, só perde essa otimização).
   exclui o próprio usuário, quem já é seguido e quem já é amigo aceito,
   priorizando perfis da mesma cidade (`app/social.php::list_recommended_profiles()`).
 - **Buscar** (`buscar.php`): filtro por tipo de perfil (casal/mulher
-  solteira/homem solteiro), cidade e interesse, combináveis; cada
-  resultado mostra o botão de seguir já refletindo se o usuário logado já
-  segue aquele perfil ou não.
+  solteira/homem solteiro), UF + cidade (select em cascata), interesse e
+  faixa de idade, combináveis; cada resultado mostra a idade aproximada e
+  o botão de seguir já refletindo se o usuário logado já segue aquele
+  perfil ou não.
+- **Cidades do Brasil por estado**: tanto o cadastro quanto a busca usam
+  um select de UF que carrega a lista de cidades daquele estado via
+  `api/cities.php?uf=XX` (fetch, sem recarregar a página) — lista
+  completa e oficial dos 5.570 municípios do Brasil
+  (`app/data/cidades_brasil.php`), sem depender de API externa em
+  produção. Isso substitui o campo de texto livre antigo, evitando
+  cidades digitadas de formas diferentes que não batiam na busca.
+- **Interesse com opções fixas**: em vez de texto livre, cadastro e busca
+  usam a mesma lista fechada de opções (Homem, Mulher, Casal (H e M),
+  Casal (H e H), Casal (M e M), Travesti, Mulher Trans, Homem Trans —
+  `app/helpers.php::INTEREST_OPTIONS`), garantindo que o filtro de busca
+  sempre encontre exatamente o que foi cadastrado.
 - **Notificações** (`notificacoes.php`, tabela `notifications`): toda
   curtida ou comentário recebido por uma foto gera uma notificação para o
   dono da foto (nunca para curtida/comentário na própria foto); o menu
