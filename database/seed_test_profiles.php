@@ -58,7 +58,7 @@ $perfis = [
     [
         'display_name' => 'Casal Aurora',
         'type' => 'COUPLE',
-        'interest' => 'Casais e mulheres solteiras',
+        'interest' => 'Mulher',
         'description' => 'Perfil fictício de teste — casal, gosta de jantares e viagens.',
         'birth_date' => '1990-04-12',
         'email' => 'casal.aurora@example.com',
@@ -73,7 +73,7 @@ $perfis = [
     [
         'display_name' => 'Enzo Cardoso',
         'type' => 'SINGLE_MAN',
-        'interest' => 'Casais e mulheres solteiras',
+        'interest' => 'Mulher',
         'description' => 'Perfil fictício de teste — homem solteiro, gosta de vinhos e música ao vivo.',
         'birth_date' => '1988-09-30',
         'email' => 'enzo.cardoso@example.com',
@@ -88,7 +88,7 @@ $perfis = [
     [
         'display_name' => 'Bia Duarte',
         'type' => 'SINGLE_WOMAN',
-        'interest' => 'Casais e homens solteiros',
+        'interest' => 'Homem',
         'description' => 'Perfil fictício de teste — mulher solteira, adora praia e trilhas.',
         'birth_date' => '1995-01-18',
         'email' => 'bia.duarte@example.com',
@@ -103,7 +103,7 @@ $perfis = [
     [
         'display_name' => 'Nina Salgado',
         'type' => 'SINGLE_WOMAN',
-        'interest' => 'Casais',
+        'interest' => 'Casal (H e M)',
         'description' => 'Perfil fictício de teste — mulher solteira, gosta de arte e boa gastronomia.',
         'birth_date' => '1992-07-05',
         'email' => 'nina.salgado@example.com',
@@ -118,7 +118,7 @@ $perfis = [
     [
         'display_name' => 'Lara Ventura',
         'type' => 'SINGLE_WOMAN',
-        'interest' => 'Casais e mulheres solteiras',
+        'interest' => 'Mulher',
         'description' => 'Perfil fictício de teste — mulher solteira, apaixonada por fotografia.',
         'birth_date' => '1993-11-22',
         'email' => 'lara.ventura@example.com',

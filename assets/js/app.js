@@ -255,6 +255,38 @@
     });
   });
 
+  // --- UF -> cidade em cascata (cadastro e busca) ---
+  document.querySelectorAll("[data-state-select]").forEach(function (select) {
+    var citySelect = document.getElementById(select.getAttribute("data-city-target"));
+    if (!citySelect) return;
+
+    select.addEventListener("change", function () {
+      var uf = select.value;
+      var placeholder = citySelect.getAttribute("data-empty-label") || "Selecione a cidade";
+      citySelect.innerHTML = "";
+
+      if (!uf) {
+        citySelect.appendChild(new Option("Escolha a UF primeiro", ""));
+        return;
+      }
+
+      citySelect.appendChild(new Option("Carregando...", ""));
+      fetch("/api/cities.php?uf=" + encodeURIComponent(uf))
+        .then(function (res) { return res.json(); })
+        .then(function (data) {
+          citySelect.innerHTML = "";
+          citySelect.appendChild(new Option(placeholder, ""));
+          (data.cidades || []).forEach(function (cidade) {
+            citySelect.appendChild(new Option(cidade, cidade));
+          });
+        })
+        .catch(function () {
+          citySelect.innerHTML = "";
+          citySelect.appendChild(new Option("Erro ao carregar cidades", ""));
+        });
+    });
+  });
+
   // --- Chat interno (polling) ---
   var chatWindow = document.querySelector("[data-chat-window]");
   if (chatWindow) {

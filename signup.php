@@ -53,8 +53,12 @@ require __DIR__ . '/templates/header.php';
     <option value="SINGLE_MAN">Homem solteiro</option>
   </select>
 
-  <input class="input" name="interest" placeholder="Interesse (ex.: casais e mulheres)"
-         value="<?= e($_POST['interest'] ?? '') ?>">
+  <select class="input" name="interest">
+    <option value="">Interesse (opcional)</option>
+    <?php foreach (INTEREST_OPTIONS as $opt): ?>
+      <option value="<?= e($opt) ?>" <?= ($_POST['interest'] ?? '') === $opt ? 'selected' : '' ?>><?= e($opt) ?></option>
+    <?php endforeach; ?>
+  </select>
 
   <textarea class="input" name="description" placeholder="Descrição"><?= e($_POST['description'] ?? '') ?></textarea>
 
@@ -65,17 +69,21 @@ require __DIR__ . '/templates/header.php';
   </label>
 
   <div class="form" style="flex-direction:row;gap:.75rem">
-    <label class="text-sm text-muted" style="flex:2">
-      Cidade
-      <input class="input" name="city" placeholder="Cidade" required
-             value="<?= e($_POST['city'] ?? '') ?>">
-    </label>
     <label class="text-sm text-muted" style="flex:1">
       UF
-      <select class="input" name="state" required>
+      <select class="input" name="state" required data-state-select data-city-target="city-select">
         <option value="">UF</option>
         <?php foreach (BRAZIL_STATES as $uf): ?>
           <option value="<?= e($uf) ?>" <?= ($_POST['state'] ?? '') === $uf ? 'selected' : '' ?>><?= e($uf) ?></option>
+        <?php endforeach; ?>
+      </select>
+    </label>
+    <label class="text-sm text-muted" style="flex:2">
+      Cidade
+      <select class="input" name="city" required id="city-select">
+        <option value=""><?= ($_POST['state'] ?? '') ? 'Selecione a cidade' : 'Escolha a UF primeiro' ?></option>
+        <?php foreach (cities_for_state((string)($_POST['state'] ?? '')) as $cidade): ?>
+          <option value="<?= e($cidade) ?>" <?= ($_POST['city'] ?? '') === $cidade ? 'selected' : '' ?>><?= e($cidade) ?></option>
         <?php endforeach; ?>
       </select>
     </label>

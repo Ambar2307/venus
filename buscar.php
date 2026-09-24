@@ -4,13 +4,17 @@ require_once __DIR__ . '/app/bootstrap.php';
 $currentUser = require_login_page();
 
 $tipo = (string)($_GET['type'] ?? '');
+$uf = strtoupper(trim((string)($_GET['state'] ?? '')));
 $cidade = trim((string)($_GET['city'] ?? ''));
 $interesse = trim((string)($_GET['interest'] ?? ''));
-$temFiltro = $tipo !== '' || $cidade !== '' || $interesse !== '';
+$idadeMin = (string)($_GET['idade_min'] ?? '') !== '' ? max(18, (int)$_GET['idade_min']) : null;
+$idadeMax = (string)($_GET['idade_max'] ?? '') !== '' ? min(120, (int)$_GET['idade_max']) : null;
+$temFiltro = $tipo !== '' || $uf !== '' || $cidade !== '' || $interesse !== '' || $idadeMin !== null || $idadeMax !== null;
 
 $resultados = [];
 if ($temFiltro) {
-    $sql = "SELECT u.id, u.city, u.state, p.display_name, p.type, p.interest
+    $sql = "SELECT u.id, u.city, u.state, p.display_name, p.type, p.interest,
+                   TIMESTAMPDIFF(YEAR, u.birth_date, CURDATE()) AS idade
             FROM users u JOIN profiles p ON p.user_id = u.id
             WHERE u.id != ? AND u.status = 'active'";
     $params = [$currentUser['id']];
@@ -19,13 +23,25 @@ if ($temFiltro) {
         $sql .= ' AND p.type = ?';
         $params[] = $tipo;
     }
-    if ($cidade !== '') {
-        $sql .= ' AND u.city LIKE ?';
-        $params[] = '%' . $cidade . '%';
+    if ($uf !== '' && in_array($uf, BRAZIL_STATES, true)) {
+        $sql .= ' AND u.state = ?';
+        $params[] = $uf;
     }
-    if ($interesse !== '') {
-        $sql .= ' AND p.interest LIKE ?';
-        $params[] = '%' . $interesse . '%';
+    if ($cidade !== '') {
+        $sql .= ' AND u.city = ?';
+        $params[] = $cidade;
+    }
+    if ($interesse !== '' && in_array($interesse, INTEREST_OPTIONS, true)) {
+        $sql .= ' AND p.interest = ?';
+        $params[] = $interesse;
+    }
+    if ($idadeMin !== null) {
+        $sql .= ' AND TIMESTAMPDIFF(YEAR, u.birth_date, CURDATE()) >= ?';
+        $params[] = $idadeMin;
+    }
+    if ($idadeMax !== null) {
+        $sql .= ' AND TIMESTAMPDIFF(YEAR, u.birth_date, CURDATE()) <= ?';
+        $params[] = $idadeMax;
     }
     $sql .= ' ORDER BY p.display_name ASC LIMIT 50';
 
@@ -50,8 +66,42 @@ require __DIR__ . '/templates/header.php';
     <option value="SINGLE_WOMAN" <?= $tipo === 'SINGLE_WOMAN' ? 'selected' : '' ?>>Mulher solteira</option>
     <option value="SINGLE_MAN" <?= $tipo === 'SINGLE_MAN' ? 'selected' : '' ?>>Homem solteiro</option>
   </select>
-  <input class="input" type="text" name="city" placeholder="Cidade" value="<?= e($cidade) ?>">
-  <input class="input" type="text" name="interest" placeholder="Interesse (ex.: casais, viagens)" value="<?= e($interesse) ?>">
+
+  <div class="form" style="flex-direction:row;gap:.75rem">
+    <select class="input" name="state" style="flex:1" data-state-select data-city-target="city-select-buscar">
+      <option value="">UF</option>
+      <?php foreach (BRAZIL_STATES as $ufOpt): ?>
+        <option value="<?= e($ufOpt) ?>" <?= $uf === $ufOpt ? 'selected' : '' ?>><?= e($ufOpt) ?></option>
+      <?php endforeach; ?>
+    </select>
+    <select class="input" name="city" style="flex:2" id="city-select-buscar" data-empty-label="Todas as cidades">
+      <option value=""><?= $uf ? 'Todas as cidades' : 'Escolha a UF' ?></option>
+      <?php foreach (cities_for_state($uf) as $cidadeOpt): ?>
+        <option value="<?= e($cidadeOpt) ?>" <?= $cidade === $cidadeOpt ? 'selected' : '' ?>><?= e($cidadeOpt) ?></option>
+      <?php endforeach; ?>
+    </select>
+  </div>
+
+  <select class="input" name="interest">
+    <option value="">Todos os interesses</option>
+    <?php foreach (INTEREST_OPTIONS as $opt): ?>
+      <option value="<?= e($opt) ?>" <?= $interesse === $opt ? 'selected' : '' ?>><?= e($opt) ?></option>
+    <?php endforeach; ?>
+  </select>
+
+  <div class="form" style="flex-direction:row;gap:.75rem;align-items:flex-end">
+    <label class="text-sm text-muted" style="flex:1">
+      Idade entre
+      <input class="input" type="number" name="idade_min" min="18" max="120" placeholder="18"
+             value="<?= e((string)($_GET['idade_min'] ?? '')) ?>">
+    </label>
+    <label class="text-sm text-muted" style="flex:1">
+      e
+      <input class="input" type="number" name="idade_max" min="18" max="120" placeholder="99"
+             value="<?= e((string)($_GET['idade_max'] ?? '')) ?>">
+    </label>
+  </div>
+
   <button class="btn" type="submit">Buscar</button>
 </form>
 
@@ -63,7 +113,8 @@ require __DIR__ . '/templates/header.php';
         <a href="/perfil.php?id=<?= e($r['id']) ?>" class="text-sm">
           <?= e($r['display_name']) ?>
           <span class="text-xs text-muted">
-            <?= e(PROFILE_TYPE_LABEL[$r['type']] ?? '') ?> · <?= e($r['city']) ?>/<?= e($r['state']) ?>
+            <?= e(PROFILE_TYPE_LABEL[$r['type']] ?? '') ?> · <?= (int)$r['idade'] ?> anos ·
+            <?= e($r['city']) ?>/<?= e($r['state']) ?>
             <?php if ($r['interest']): ?> · <?= e($r['interest']) ?><?php endif; ?>
           </span>
         </a>

@@ -257,3 +257,30 @@ const PROFILE_TYPE_LABEL = [
     'SINGLE_WOMAN' => 'Solteira',
     'SINGLE_MAN' => 'Solteiro',
 ];
+
+const INTEREST_OPTIONS = [
+    'Homem',
+    'Mulher',
+    'Casal (H e M)',
+    'Casal (H e H)',
+    'Casal (M e M)',
+    'Travesti',
+    'Mulher Trans',
+    'Homem Trans',
+];
+
+/** Municípios do Brasil por UF (27 estados, 5.570 cidades) — carregado uma vez por request. */
+function brazil_cities(): array
+{
+    static $cidades = null;
+    if ($cidades === null) {
+        $cidades = require __DIR__ . '/data/cidades_brasil.php';
+    }
+    return $cidades;
+}
+
+/** Lista de cidades de uma UF, ou lista vazia se a UF não existir. */
+function cities_for_state(string $uf): array
+{
+    return brazil_cities()[strtoupper($uf)] ?? [];
+}

@@ -54,11 +54,14 @@ function register_user(array $input): string
     if (!is_valid_cpf($cpf)) {
         throw new RuntimeException('Informe um CPF válido — ele é usado só para confirmar sua idade e não é exibido no seu perfil.');
     }
-    if ($city === '') {
-        throw new RuntimeException('Informe sua cidade.');
-    }
     if (!in_array($state, BRAZIL_STATES, true)) {
         throw new RuntimeException('Selecione um estado (UF) válido.');
+    }
+    if ($city === '' || !in_array($city, cities_for_state($state), true)) {
+        throw new RuntimeException('Selecione uma cidade válida para o estado escolhido.');
+    }
+    if ($interest !== '' && !in_array($interest, INTEREST_OPTIONS, true)) {
+        throw new RuntimeException('Selecione uma opção de interesse válida.');
     }
 
     $pdo = db();
