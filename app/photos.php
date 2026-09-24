@@ -88,18 +88,32 @@ function fetch_own_photos(string $userId): array
     return $stmt->fetchAll();
 }
 
-/** Busca o feed (fotos aprovadas) já resolvendo visibilidade, curtidas e comentários. */
-function fetch_feed(?string $viewerId, int $limit = 30): array
+/**
+ * Busca o feed (fotos aprovadas) já resolvendo visibilidade, curtidas e comentários.
+ * $filtro: 'todos' (padrão), 'estado' (só fotos de usuários do mesmo estado de
+ * $viewerState) ou 'seguindo' (só fotos de quem $viewerId segue).
+ */
+function fetch_feed(?string $viewerId, int $limit = 30, string $filtro = 'todos', ?string $viewerState = null): array
 {
-    $stmt = db()->prepare(
-        "SELECT p.*, pr.display_name, pr.type
-         FROM photos p
-         JOIN profiles pr ON pr.user_id = p.user_id
-         WHERE p.moderation_status = 'APPROVED'
-         ORDER BY p.created_at DESC
-         LIMIT " . (int)$limit
-    );
-    $stmt->execute();
+    $sql = "SELECT p.*, pr.display_name, pr.type
+            FROM photos p
+            JOIN profiles pr ON pr.user_id = p.user_id
+            JOIN users owner ON owner.id = p.user_id
+            WHERE p.moderation_status = 'APPROVED'";
+    $params = [];
+
+    if ($filtro === 'estado' && $viewerState) {
+        $sql .= ' AND owner.state = ?';
+        $params[] = $viewerState;
+    } elseif ($filtro === 'seguindo' && $viewerId) {
+        $sql .= ' AND p.user_id IN (SELECT followed_id FROM follows WHERE follower_id = ?)';
+        $params[] = $viewerId;
+    }
+
+    $sql .= ' ORDER BY p.created_at DESC LIMIT ' . (int)$limit;
+
+    $stmt = db()->prepare($sql);
+    $stmt->execute($params);
     $fotos = $stmt->fetchAll();
 
     if (!$fotos) {

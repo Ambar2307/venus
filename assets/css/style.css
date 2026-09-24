@@ -583,6 +583,8 @@ textarea.input {
   padding: .45rem .95rem;
   font-size: .82rem;
   cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
   transition: color .15s ease, border-color .15s ease, background-color .15s ease;
 }
 

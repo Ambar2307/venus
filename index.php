@@ -2,7 +2,11 @@
 require_once __DIR__ . '/app/bootstrap.php';
 
 $currentUser = current_user();
-$fotos = fetch_feed($currentUser['id'] ?? null);
+$filtro = (string)($_GET['filtro'] ?? 'todos');
+if (!$currentUser || !in_array($filtro, ['estado', 'seguindo'], true)) {
+    $filtro = 'todos';
+}
+$fotos = fetch_feed($currentUser['id'] ?? null, 30, $filtro, $currentUser['state'] ?? null);
 
 $pageTitle = 'Feed — Clube do Swing';
 $activePage = 'feed';
@@ -10,7 +14,15 @@ require __DIR__ . '/templates/header.php';
 ?>
 
 <h1 class="font-serif">Feed</h1>
-<p class="text-xs text-muted" style="margin-bottom:1.5rem">Últimas atualizações da comunidade.</p>
+<p class="text-xs text-muted" style="margin-bottom:1rem">Últimas atualizações da comunidade.</p>
+
+<?php if ($currentUser): ?>
+  <div class="tabs" style="margin-bottom:1.5rem">
+    <a href="/index.php" class="tab-btn <?= $filtro === 'todos' ? 'active' : '' ?>">Todos</a>
+    <a href="/index.php?filtro=estado" class="tab-btn <?= $filtro === 'estado' ? 'active' : '' ?>">Do meu estado</a>
+    <a href="/index.php?filtro=seguindo" class="tab-btn <?= $filtro === 'seguindo' ? 'active' : '' ?>">Quem eu sigo</a>
+  </div>
+<?php endif; ?>
 
 <?php if (!$currentUser): ?>
   <div class="notice" style="margin-bottom:1.5rem">
@@ -93,7 +105,16 @@ require __DIR__ . '/templates/header.php';
   <?php endforeach; ?>
 
   <?php if (!$fotos): ?>
-    <p class="text-sm text-muted">Nenhuma foto aprovada ainda.</p>
+    <p class="text-sm text-muted">
+      <?php if ($filtro === 'estado'): ?>
+        Ninguém do seu estado publicou fotos ainda.
+      <?php elseif ($filtro === 'seguindo'): ?>
+        Você ainda não segue ninguém, ou quem você segue ainda não publicou fotos.
+        Use a <a href="/buscar.php" class="text-gold">Buscar</a> para encontrar perfis.
+      <?php else: ?>
+        Nenhuma foto aprovada ainda.
+      <?php endif; ?>
+    </p>
   <?php endif; ?>
 </div>
 
