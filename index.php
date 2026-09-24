@@ -27,10 +27,10 @@ require __DIR__ . '/templates/header.php';
 <div class="stack">
   <?php foreach ($fotos as $foto): ?>
     <?php $tipo = PROFILE_TYPE_LABEL[$foto['type']] ?? ''; ?>
-    <article class="card" data-photo-id="<?= e($foto['id']) ?>">
+    <article class="card feed-card" data-photo-id="<?= e($foto['id']) ?>">
       <div class="photo-header">
         <a href="/perfil.php?id=<?= e($foto['user_id']) ?>" style="display:contents">
-          <div class="avatar"></div>
+          <div class="avatar"><?= e(initials($foto['display_name'])) ?></div>
           <div>
             <div class="text-sm" style="font-weight:600"><?= e($foto['display_name']) ?></div>
             <div class="text-xs text-muted"><?= e($tipo) ?></div>

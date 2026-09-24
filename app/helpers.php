@@ -202,6 +202,18 @@ function only_digits(string $value): string
     return preg_replace('/\D/', '', $value) ?? '';
 }
 
+/** Gera as iniciais (até 2 letras) de um nome, para o círculo de avatar. */
+function initials(string $name): string
+{
+    $parts = array_filter(preg_split('/\s+/', trim($name)) ?: []);
+    if (!$parts) {
+        return '?';
+    }
+    $first = mb_substr((string)reset($parts), 0, 1);
+    $last = count($parts) > 1 ? mb_substr((string)end($parts), 0, 1) : '';
+    return mb_strtoupper($first . $last);
+}
+
 /**
  * Valida o CPF pelo algoritmo oficial dos dois dígitos verificadores.
  * Recebe o CPF já só com dígitos (ver only_digits()).

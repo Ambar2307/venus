@@ -53,7 +53,7 @@ require __DIR__ . '/../templates/header.php';
   <?php foreach ($denuncias as $rep): ?>
     <article class="card" data-report-row="<?= e($rep['id']) ?>">
       <div class="photo-header">
-        <div class="avatar"></div>
+        <div class="avatar"><?= e(initials($rep['reported_name'])) ?></div>
         <div>
           <div class="text-sm" style="font-weight:600">Foto de <?= e($rep['reported_name']) ?></div>
           <div class="text-xs text-muted">
@@ -96,7 +96,7 @@ require __DIR__ . '/../templates/header.php';
   <?php foreach ($pendentes as $foto): ?>
     <article class="card" data-mod-photo="<?= e($foto['id']) ?>">
       <div class="photo-header">
-        <div class="avatar"></div>
+        <div class="avatar"><?= e(initials($foto['display_name'])) ?></div>
         <div>
           <div class="text-sm" style="font-weight:600"><?= e($foto['display_name']) ?></div>
           <div class="text-xs text-muted"><?= e(date('d/m/Y H:i', strtotime($foto['created_at']))) ?></div>

@@ -91,7 +91,7 @@ require __DIR__ . '/templates/header.php';
 
 <div class="card" style="padding:1.5rem;margin-bottom:1.5rem">
   <div style="display:flex;gap:1rem;align-items:flex-start">
-    <div class="avatar" style="width:4rem;height:4rem"></div>
+    <div class="avatar" style="width:4rem;height:4rem;font-size:1.4rem"><?= e(initials($profile['display_name'])) ?></div>
     <div style="flex:1">
       <h1 class="font-serif" style="margin-bottom:.25rem"><?= e($profile['display_name']) ?></h1>
       <div class="text-sm text-muted"><?= e($tipo) ?> · Interesse: <?= e($profile['interest'] ?: '—') ?></div>
@@ -159,7 +159,7 @@ require __DIR__ . '/templates/header.php';
 
     <div class="stack">
       <?php foreach ($minhasFotos as $foto): ?>
-        <article class="card" data-my-photo="<?= e($foto['id']) ?>">
+        <article class="card feed-card" data-my-photo="<?= e($foto['id']) ?>">
           <div class="photo-media" style="margin-top:1rem">
             <img src="/photo.php?id=<?= e($foto['id']) ?>" alt="">
           </div>
