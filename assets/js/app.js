@@ -222,6 +222,57 @@
     });
   });
 
+  // --- Landing page: palavra alternando no título do hero ---
+  var cycleEl = document.querySelector("[data-cycle-words]");
+  if (cycleEl) {
+    var words = [];
+    try {
+      words = JSON.parse(cycleEl.getAttribute("data-cycle-words"));
+    } catch (e) {
+      words = [];
+    }
+    if (words.length > 1) {
+      var wordIndex = 0;
+      setInterval(function () {
+        cycleEl.classList.add("is-swapping");
+        setTimeout(function () {
+          wordIndex = (wordIndex + 1) % words.length;
+          cycleEl.textContent = words[wordIndex];
+          cycleEl.classList.remove("is-swapping");
+        }, 350);
+      }, 2600);
+    }
+  }
+
+  // --- Landing page: seções aparecem suavemente ao rolar ---
+  // Reforço progressivo: o elemento já é visível por padrão (ver CSS). Só
+  // escondemos e animamos se o navegador suporta IntersectionObserver; assim,
+  // se o JS falhar ou demorar, o conteúdo nunca fica preso em opacity:0.
+  var revealEls = document.querySelectorAll("[data-reveal]");
+  if (revealEls.length && "IntersectionObserver" in window) {
+    var observer = new IntersectionObserver(
+      function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) {
+            entry.target.classList.remove("reveal-pending");
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.15 }
+    );
+    revealEls.forEach(function (el) {
+      // Só anima quem começa fora da tela — o que já aparece no primeiro
+      // carregamento (ex.: o hero) fica sempre visível, sem risco de piscar.
+      var rect = el.getBoundingClientRect();
+      var startsOffscreen = rect.top > window.innerHeight * 0.85;
+      if (startsOffscreen) {
+        el.classList.add("reveal-pending");
+      }
+      observer.observe(el);
+    });
+  }
+
   // --- Chat interno (polling) ---
   var chatWindow = document.querySelector("[data-chat-window]");
   if (chatWindow) {

@@ -27,22 +27,94 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $currentUser) {
     }
 }
 
-$fotos = fetch_feed($currentUser['id'] ?? null);
-
-$pageTitle = 'Feed — Reserva';
+$pageTitle = $currentUser ? 'Feed — Reserva' : 'Reserva — Clube de encontros para casais e solteiros(as)';
 $activePage = 'feed';
 require __DIR__ . '/templates/header.php';
+
+if (!$currentUser):
+?>
+
+<section class="hero" data-reveal>
+  <div class="hero-glow hero-glow-1"></div>
+  <div class="hero-glow hero-glow-2"></div>
+  <div class="hero-content">
+    <span class="badge badge-gold hero-badge">Clube privado · só para maiores de 18</span>
+    <h1 class="font-serif hero-title">
+      Onde o desejo encontra
+      <span class="hero-cycle" data-cycle-words='["discrição.","bom gosto.","cumplicidade.","o seu ritmo."]'>discrição.</span>
+    </h1>
+    <p class="hero-sub">
+      Reserva é a rede social de encontros para casais e solteiros(as) que
+      preferem ir com calma: nome fictício, fotos moderadas e conversas que só
+      acontecem quando os dois topam.
+    </p>
+    <div class="hero-actions">
+      <a href="/signup.php" class="btn">Criar meu perfil</a>
+      <a href="/login.php" class="btn btn-outline">Já sou membro</a>
+    </div>
+  </div>
+</section>
+
+<section class="feature-grid" data-reveal>
+  <div class="feature-card">
+    <div class="feature-icon">✦</div>
+    <h3 class="text-sm font-serif">Nome fictício, por escolha</h3>
+    <p class="text-sm text-muted">Você decide o quanto revelar. Seu perfil nunca precisa levar o seu nome real.</p>
+  </div>
+  <div class="feature-card">
+    <div class="feature-icon">✦</div>
+    <h3 class="text-sm font-serif">Fotos com moderação</h3>
+    <p class="text-sm text-muted">Toda foto passa por aprovação antes de entrar no feed. Sem surpresas indesejadas.</p>
+  </div>
+  <div class="feature-card">
+    <div class="feature-icon">✦</div>
+    <h3 class="text-sm font-serif">Seus dados, sigilosos</h3>
+    <p class="text-sm text-muted">E-mail, telefone e CPF ficam só com a gente — usados apenas para confirmar sua idade.</p>
+  </div>
+  <div class="feature-card">
+    <div class="feature-icon">✦</div>
+    <h3 class="text-sm font-serif">Visibilidade sob controle</h3>
+    <p class="text-sm text-muted">Escolha o que é público e o que fica reservado só para quem você aceitar como amigo.</p>
+  </div>
+</section>
+
+<section class="steps" data-reveal>
+  <h2 class="font-serif" style="text-align:center;margin-bottom:1.5rem">Como funciona</h2>
+  <div class="steps-grid">
+    <div class="step-card">
+      <span class="step-number">1</span>
+      <h3 class="text-sm font-serif">Crie seu perfil</h3>
+      <p class="text-sm text-muted">Nome fictício, poucos cliques, total controle do que é seu.</p>
+    </div>
+    <div class="step-card">
+      <span class="step-number">2</span>
+      <h3 class="text-sm font-serif">Publique com discrição</h3>
+      <p class="text-sm text-muted">Fotos públicas ou reservadas só aos amigos — a decisão é sempre sua.</p>
+    </div>
+    <div class="step-card">
+      <span class="step-number">3</span>
+      <h3 class="text-sm font-serif">Conecte-se no seu tempo</h3>
+      <p class="text-sm text-muted">Curta, comente, peça amizade. Converse de verdade no plano Exclusivo.</p>
+    </div>
+  </div>
+</section>
+
+<section class="cta-band" data-reveal>
+  <h2 class="font-serif">Pronto para começar?</h2>
+  <p class="text-sm text-muted">Leva menos de dois minutos. É gratuito.</p>
+  <a href="/signup.php" class="btn">Criar meu perfil com Acesso Livre</a>
+  <p class="text-xs text-muted" style="margin-top:1rem">
+    <a href="/termos.php" class="text-muted">Termos de Uso</a> ·
+    <a href="/privacidade.php" class="text-muted">Política de Privacidade</a>
+  </p>
+</section>
+
+<?php
+else:
+    $fotos = fetch_feed($currentUser['id']);
 ?>
 
 <h1 class="font-serif">Feed</h1>
-
-<?php if (!$currentUser): ?>
-  <div class="notice" style="margin-bottom:1.5rem">
-    Você está vendo o feed como visitante.
-    <a href="/login.php" class="text-gold">Entrar</a> ou
-    <a href="/signup.php" class="text-gold">criar perfil</a> para curtir e comentar.
-  </div>
-<?php endif; ?>
 
 <?php if ($sucesso): ?>
   <div class="notice" style="margin-bottom:1.5rem"><?= e($sucesso) ?></div>
@@ -132,5 +204,7 @@ require __DIR__ . '/templates/header.php';
     <p class="text-sm text-muted">Nenhuma foto aprovada ainda.</p>
   <?php endif; ?>
 </div>
+
+<?php endif; ?>
 
 <?php require __DIR__ . '/templates/footer.php'; ?>
