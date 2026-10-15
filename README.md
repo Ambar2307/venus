@@ -160,6 +160,8 @@ sem reprocessar (a app não quebra, só perde essa otimização).
   vertical (`app/photos.php::fetch_profile_thumbnails()` busca as
   fotos de capa em lote); cada card mostra idade aproximada e o botão
   de seguir já refletindo se o usuário logado já segue aquele perfil.
+  Acessível também sem login (visitante vê os resultados com "Entrar
+  para seguir" no lugar do botão real), igual ao feed.
 - **Cidades do Brasil por estado**: tanto o cadastro quanto a busca usam
   um select de UF que carrega a lista de cidades daquele estado via
   `api/cities.php?uf=XX` (fetch, sem recarregar a página) — lista
