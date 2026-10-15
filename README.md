@@ -112,20 +112,32 @@ sem reprocessar (a app não quebra, só perde essa otimização).
   identificação do autor, curtidas e comentários do card do feed —
   mesma checagem de visibilidade do `photo.php` (pública, reservada aos
   amigos, dono ou admin).
-- **Perfil de outra pessoa reformulado**: agora mostra a foto mais
-  recente visível em destaque no topo (tamanho grande), a identificação
-  (nome, tipo, interesse, descrição) logo abaixo com os botões de
-  amizade/seguir, e uma grade de miniaturas com todas as fotos do
-  usuário na parte inferior — fotos reservadas aparecem com cadeado
-  para quem não é amigo. Clicar em qualquer miniatura abre
-  `ver-foto.php`. A visão do próprio perfil ("Meu perfil", com as
-  abas) não muda.
+- **Cabeçalho de perfil com capa/avatar/estatísticas**: tanto o perfil de
+  outra pessoa quanto o modo preview mostram uma capa em mosaico com as
+  duas fotos públicas/visíveis mais recentes, avatar circular sobreposto,
+  nome centralizado, estatísticas reais (visualizações, seguindo,
+  seguidores — `app/social.php::count_followers()`/`count_following()`/
+  `count_profile_visits()`) e linhas de informação com ícone (tipo,
+  interesse, "no Clube do Swing desde"). Abaixo, duas abas — "Principal"
+  (as fotos em formato de post, uma embaixo da outra) e "Fotos" (grade de
+  miniaturas) — com fotos reservadas aparecendo com cadeado pra quem não
+  é amigo. Cidade/UF nunca aparecem aqui (continuam confidenciais). A
+  visão de edição do próprio perfil ("Meu perfil", com as abas de upload/
+  amigos/seguidores) usa o mesmo cabeçalho, mas mantém suas abas de
+  sempre.
 - **"Ver como terceiros veem meu perfil"**: botão em "Meu perfil" que
   mostra exatamente a mesma tela (`perfil.php?preview=1`) que um
-  visitante que não é seu amigo veria — foto de destaque, identificação
-  e grade de miniaturas com fotos "só amigos" mostrando cadeado, sem as
-  abas/formulário de edição. Um aviso no topo indica o modo de
-  visualização, com botão para voltar.
+  visitante que não é seu amigo veria, sem as abas/formulário de edição.
+  Um aviso no topo indica o modo de visualização, com botão para voltar.
+- **Menu lateral com ícones + botão "Postar"**: cada item do menu tem um
+  ícone de linha (`app/helpers.php::nav_icon()`, SVG inline) e, fixo na
+  parte de baixo, um botão "Postar" em destaque que leva direto pra aba
+  de publicar foto em Meu perfil.
+- **Tempo decorrido e avatar nos comentários**: cada post do feed e da
+  página de foto individual mostra há quanto tempo foi publicado
+  (`app/helpers.php::tempo_relativo()`), e cada comentário vem com um
+  avatarzinho de iniciais + tempo decorrido, tanto nos já carregados
+  quanto nos adicionados na hora via AJAX.
 - **Administradores podem excluir comentários**: um "✕" aparece ao
   lado de cada comentário (feed e foto individual) só para quem tem
   `is_admin=1` — `api/comment_delete.php` (POST, CSRF,
