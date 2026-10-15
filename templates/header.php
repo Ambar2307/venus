@@ -24,8 +24,8 @@ $activePage = $activePage ?? '';
     </a>
     <nav class="nav-links">
       <a href="/index.php" class="<?= $activePage === 'feed' ? 'active' : '' ?>">Feed</a>
+      <a href="/buscar.php" class="<?= $activePage === 'buscar' ? 'active' : '' ?>">Buscar</a>
       <?php if ($currentUser): ?>
-        <a href="/buscar.php" class="<?= $activePage === 'buscar' ? 'active' : '' ?>">Buscar</a>
         <a href="/amigos.php" class="<?= $activePage === 'amigos' ? 'active' : '' ?>">Amigos</a>
         <a href="/chat.php" class="<?= $activePage === 'chat' ? 'active' : '' ?>">Chat</a>
         <a href="/perfil.php" class="<?= $activePage === 'perfil' ? 'active' : '' ?>">Meu perfil</a>

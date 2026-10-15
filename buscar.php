@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__ . '/app/bootstrap.php';
 
-$currentUser = require_login_page();
+$currentUser = current_user();
 
 $tipo = (string)($_GET['type'] ?? '');
 $uf = strtoupper(trim((string)($_GET['state'] ?? '')));
@@ -16,8 +16,12 @@ if ($temFiltro) {
     $sql = "SELECT u.id, u.city, u.state, p.display_name, p.type, p.interest,
                    TIMESTAMPDIFF(YEAR, u.birth_date, CURDATE()) AS idade
             FROM users u JOIN profiles p ON p.user_id = u.id
-            WHERE u.id != ? AND u.status = 'active'";
-    $params = [$currentUser['id']];
+            WHERE u.status = 'active'";
+    $params = [];
+    if ($currentUser) {
+        $sql .= ' AND u.id != ?';
+        $params[] = $currentUser['id'];
+    }
 
     if ($tipo !== '' && in_array($tipo, ['COUPLE', 'SINGLE_WOMAN', 'SINGLE_MAN'], true)) {
         $sql .= ' AND p.type = ?';
@@ -51,7 +55,7 @@ if ($temFiltro) {
 }
 
 $miniaturas = fetch_profile_thumbnails(array_column($resultados, 'id'));
-$seguindoIds = array_column(list_following($currentUser['id']), 'id');
+$seguindoIds = $currentUser ? array_column(list_following($currentUser['id']), 'id') : [];
 
 $pageTitle = 'Buscar — Clube do Swing';
 $activePage = 'buscar';
@@ -59,6 +63,14 @@ require __DIR__ . '/templates/header.php';
 ?>
 
 <h1 class="font-serif">Buscar</h1>
+
+<?php if (!$currentUser): ?>
+  <div class="notice" style="margin-bottom:1.5rem">
+    Você está buscando como visitante.
+    <a href="/login.php" class="text-gold">Entrar</a> ou
+    <a href="/signup.php" class="text-gold">criar perfil</a> para seguir perfis e ver mais detalhes.
+  </div>
+<?php endif; ?>
 
 <form method="get" class="form" style="max-width:480px;margin-bottom:2rem">
   <select class="input" name="type">
@@ -128,10 +140,16 @@ require __DIR__ . '/templates/header.php';
           <?php if ($r['interest']): ?>
             <div class="text-xs text-muted"><?= e($r['interest']) ?></div>
           <?php endif; ?>
-          <button
-            class="btn btn-sm <?= $jaSegue ? 'btn-ghost' : 'btn-outline' ?>" style="margin-top:.5rem;width:100%"
-            data-follow-btn data-user-id="<?= e($r['id']) ?>" data-following="<?= $jaSegue ? '1' : '0' ?>"
-          ><?= $jaSegue ? 'Deixar de seguir' : 'Seguir' ?></button>
+          <?php if ($currentUser): ?>
+            <button
+              class="btn btn-sm <?= $jaSegue ? 'btn-ghost' : 'btn-outline' ?>" style="margin-top:.5rem;width:100%"
+              data-follow-btn data-user-id="<?= e($r['id']) ?>" data-following="<?= $jaSegue ? '1' : '0' ?>"
+            ><?= $jaSegue ? 'Deixar de seguir' : 'Seguir' ?></button>
+          <?php else: ?>
+            <a href="/login.php" class="btn btn-outline btn-sm" style="margin-top:.5rem;width:100%;text-align:center">
+              Entrar para seguir
+            </a>
+          <?php endif; ?>
         </div>
       </div>
     <?php endforeach; ?>
