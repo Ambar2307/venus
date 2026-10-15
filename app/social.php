@@ -21,6 +21,30 @@ function toggle_follow(string $followerId, string $followedId): bool
     return true;
 }
 
+/** Quantas pessoas seguem $userId. */
+function count_followers(string $userId): int
+{
+    $stmt = db()->prepare('SELECT COUNT(*) FROM follows WHERE followed_id = ?');
+    $stmt->execute([$userId]);
+    return (int)$stmt->fetchColumn();
+}
+
+/** Quantas pessoas $userId segue. */
+function count_following(string $userId): int
+{
+    $stmt = db()->prepare('SELECT COUNT(*) FROM follows WHERE follower_id = ?');
+    $stmt->execute([$userId]);
+    return (int)$stmt->fetchColumn();
+}
+
+/** Quantas visitas (visitantes únicos) o perfil de $userId já recebeu. */
+function count_profile_visits(string $userId): int
+{
+    $stmt = db()->prepare('SELECT COUNT(DISTINCT visitor_id) FROM profile_visits WHERE visited_id = ?');
+    $stmt->execute([$userId]);
+    return (int)$stmt->fetchColumn();
+}
+
 /** Lista quem segue $userId (meus seguidores). */
 function list_followers(string $userId): array
 {

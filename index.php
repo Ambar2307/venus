@@ -48,8 +48,9 @@ require __DIR__ . '/templates/header.php';
             <div class="text-xs text-muted"><?= e($tipo) ?></div>
           </div>
         </a>
+        <span class="text-xs text-muted" style="margin-left:auto"><?= e(tempo_relativo($foto['created_at'])) ?></span>
         <?php if ($foto['visibility'] === 'FRIENDS'): ?>
-          <span class="badge badge-gold" style="margin-left:auto">Amigos</span>
+          <span class="badge badge-gold">Amigos</span>
         <?php endif; ?>
       </div>
 
@@ -85,8 +86,12 @@ require __DIR__ . '/templates/header.php';
 
         <div class="comment-list" data-comment-list>
           <?php foreach ($foto['comentarios'] as $c): ?>
-            <div data-comment-row="<?= e($c['id']) ?>">
-              <strong><?= e($c['display_name']) ?>:</strong> <?= e($c['body']) ?>
+            <div class="comment-row" data-comment-row="<?= e($c['id']) ?>">
+              <div class="avatar avatar-xs"><?= e(initials($c['display_name'])) ?></div>
+              <div class="comment-row-body">
+                <span><strong><?= e($c['display_name']) ?></strong> <?= e($c['body']) ?></span>
+                <span class="text-xs text-muted"><?= e(tempo_relativo($c['created_at'])) ?></span>
+              </div>
               <?php if ($currentUser && is_admin($currentUser)): ?>
                 <button type="button" class="comment-delete-btn" data-comment-delete-btn data-comment-id="<?= e($c['id']) ?>" title="Excluir comentário (admin)">✕</button>
               <?php endif; ?>

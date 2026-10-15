@@ -202,6 +202,25 @@ function only_digits(string $value): string
     return preg_replace('/\D/', '', $value) ?? '';
 }
 
+/** Tempo decorrido desde $datetime em formato curto ("agora", "12 min", "3 h", "5 d", ou a data). */
+function tempo_relativo(string $datetime): string
+{
+    $diff = time() - strtotime($datetime);
+    if ($diff < 60) {
+        return 'agora';
+    }
+    if ($diff < 3600) {
+        return (int)floor($diff / 60) . ' min';
+    }
+    if ($diff < 86400) {
+        return (int)floor($diff / 3600) . ' h';
+    }
+    if ($diff < 2592000) {
+        return (int)floor($diff / 86400) . ' d';
+    }
+    return date('d/m/Y', strtotime($datetime));
+}
+
 /** Gera as iniciais (até 2 letras) de um nome, para o círculo de avatar. */
 function initials(string $name): string
 {
@@ -283,4 +302,29 @@ function brazil_cities(): array
 function cities_for_state(string $uf): array
 {
     return brazil_cities()[strtoupper($uf)] ?? [];
+}
+
+/** Ícones de linha simples (24x24, herdam a cor do texto) usados no menu lateral. */
+function nav_icon(string $nome): string
+{
+    $paths = [
+        'home' => '<path d="M4 11.5 12 4l8 7.5"/><path d="M6 10v9h12v-9"/><path d="M10 19v-5h4v5"/>',
+        'search' => '<circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.3-4.3"/>',
+        'users' => '<circle cx="9" cy="8.5" r="3"/><path d="M3.5 19c0-3 2.5-5 5.5-5s5.5 2 5.5 5"/><circle cx="17" cy="9.5" r="2.3"/><path d="M15.2 14.2c2.4.3 4.3 2.1 4.3 4.8"/>',
+        'chat' => '<path d="M4 5h16v11H9l-5 4V5Z"/>',
+        'bell' => '<path d="M6 10a6 6 0 0 1 12 0v5l1.5 3h-15L6 15Z"/><path d="M10 21a2 2 0 0 0 4 0"/>',
+        'user' => '<circle cx="12" cy="8.5" r="3.5"/><path d="M5 20c0-3.6 3.1-6.5 7-6.5s7 2.9 7 6.5"/>',
+        'gem' => '<path d="m4 8 3.5-4h9L20 8l-8 11.5L4 8Z"/><path d="M4 8h16"/><path d="m9 4 3 4-3 11.5"/><path d="m15 4-3 4 3 11.5"/>',
+        'shield' => '<path d="M12 3.5 19 6v6c0 4.5-3 7.5-7 8.5-4-1-7-4-7-8.5V6l7-2.5Z"/>',
+        'logout' => '<path d="M15 4H6v16h9"/><path d="M10 12h10"/><path d="m17 8 4 4-4 4"/>',
+        'login' => '<path d="M9 4h9v16H9"/><path d="M14 12H4"/><path d="m7 8-4 4 4 4"/>',
+        'user-plus' => '<circle cx="9" cy="8.5" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6.5 6.5-6.5s6.5 2.9 6.5 6.5"/><path d="M18 8v6"/><path d="M15 11h6"/>',
+        'plus' => '<circle cx="12" cy="12" r="9.5"/><path d="M12 8v8"/><path d="M8 12h8"/>',
+        'photo' => '<rect x="3.5" y="5" width="17" height="14" rx="1.5"/><circle cx="8.5" cy="10" r="1.5"/><path d="m5 17 4.5-4.5 3 3L17 11l2.5 2.5"/>',
+        'star' => '<path d="m12 3 2.6 5.9 6.4.6-4.8 4.3 1.4 6.3L12 16.9 6.4 20.1l1.4-6.3-4.8-4.3 6.4-.6L12 3Z"/>',
+        'eye' => '<path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z"/><circle cx="12" cy="12" r="2.8"/>',
+    ];
+    $path = $paths[$nome] ?? '';
+    return '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" '
+        . 'stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' . $path . '</svg>';
 }

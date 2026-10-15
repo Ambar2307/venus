@@ -4,6 +4,14 @@
   var csrfToken = document.querySelector('meta[name="csrf-token"]');
   csrfToken = csrfToken ? csrfToken.content : "";
 
+  function iniciais(nome) {
+    var partes = nome.trim().split(/\s+/).filter(Boolean);
+    if (!partes.length) return "?";
+    var primeira = partes[0].charAt(0);
+    var ultima = partes.length > 1 ? partes[partes.length - 1].charAt(0) : "";
+    return (primeira + ultima).toUpperCase();
+  }
+
   function postJSON(url, data) {
     return fetch(url, {
       method: "POST",
@@ -66,12 +74,29 @@
           var article = form.closest("article[data-photo-id]");
           var list = article ? article.querySelector("[data-comment-list]") : null;
           if (list) {
-            var div = document.createElement("div");
-            div.setAttribute("data-comment-row", res.id);
+            var row = document.createElement("div");
+            row.className = "comment-row";
+            row.setAttribute("data-comment-row", res.id);
+
+            var avatar = document.createElement("div");
+            avatar.className = "avatar avatar-xs";
+            avatar.textContent = iniciais(res.autor);
+            row.appendChild(avatar);
+
+            var body = document.createElement("div");
+            body.className = "comment-row-body";
+            var linha = document.createElement("span");
             var strong = document.createElement("strong");
-            strong.textContent = res.autor + ": ";
-            div.appendChild(strong);
-            div.appendChild(document.createTextNode(res.texto));
+            strong.textContent = res.autor;
+            linha.appendChild(strong);
+            linha.appendChild(document.createTextNode(" " + res.texto));
+            var quando = document.createElement("span");
+            quando.className = "text-xs text-muted";
+            quando.textContent = "agora";
+            body.appendChild(linha);
+            body.appendChild(quando);
+            row.appendChild(body);
+
             if (document.body.getAttribute("data-is-admin") === "1") {
               var delBtn = document.createElement("button");
               delBtn.type = "button";
@@ -80,9 +105,9 @@
               delBtn.setAttribute("data-comment-id", res.id);
               delBtn.title = "Excluir comentário (admin)";
               delBtn.textContent = "✕";
-              div.appendChild(delBtn);
+              row.appendChild(delBtn);
             }
-            list.appendChild(div);
+            list.appendChild(row);
           }
           var countEl = article ? article.querySelector("[data-comment-count]") : null;
           if (countEl) {

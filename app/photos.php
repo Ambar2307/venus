@@ -131,7 +131,7 @@ function fetch_feed(?string $viewerId, int $limit = 30, string $filtro = 'todos'
     }
 
     $commentsStmt = db()->prepare(
-        "SELECT c.id, c.photo_id, c.body, pr.display_name
+        "SELECT c.id, c.photo_id, c.body, c.created_at, c.user_id, pr.display_name
          FROM comments c
          JOIN profiles pr ON pr.user_id = c.user_id
          WHERE c.photo_id IN ($placeholders)

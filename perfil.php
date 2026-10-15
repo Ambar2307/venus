@@ -74,6 +74,25 @@ if ($isOwnProfile && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['publ
 $tipo = PROFILE_TYPE_LABEL[$profile['type']] ?? '';
 $desde = date('m/Y', strtotime($profile['created_at']));
 
+$stmt = db()->prepare(
+    "SELECT * FROM photos WHERE user_id = ? AND moderation_status = 'APPROVED' ORDER BY created_at DESC"
+);
+$stmt->execute([$profile['id']]);
+$todasFotos = $stmt->fetchAll();
+
+// Fotos que podem entrar na capa/grade: tudo pro dono editando; só o que o
+// visitante (real ou simulado no preview) tem permissão de ver nos outros casos.
+$podeVerTudo = $isOwnProfile && !$previewMode;
+$fotosVisiveis = $podeVerTudo ? $todasFotos : array_values(array_filter(
+    $todasFotos,
+    fn($f) => $f['visibility'] === 'PUBLIC' || $amigos
+));
+$fotosCapa = array_slice($fotosVisiveis, 0, 2);
+
+$qtdSeguindo = count_following($profile['id']);
+$qtdSeguidores = count_followers($profile['id']);
+$qtdVisualizacoes = count_profile_visits($profile['id']);
+
 if ($isOwnProfile && !$previewMode) {
     $minhasFotos = fetch_own_photos($currentUser['id']);
     $meusAmigos = list_friends($currentUser['id']);
@@ -81,19 +100,7 @@ if ($isOwnProfile && !$previewMode) {
     $recomendados = list_recommended_profiles($currentUser);
     $visitasRecebidas = list_recent_visitors($currentUser['id']);
 } else {
-    $stmt = db()->prepare(
-        "SELECT * FROM photos WHERE user_id = ? AND moderation_status = 'APPROVED' ORDER BY created_at DESC"
-    );
-    $stmt->execute([$profile['id']]);
-    $todasFotos = $stmt->fetchAll();
     $seguindo = is_following($currentUser['id'], $profile['id']);
-    $fotoDestaque = null;
-    foreach ($todasFotos as $f) {
-        if ($f['visibility'] === 'PUBLIC' || $amigos) {
-            $fotoDestaque = $f;
-            break;
-        }
-    }
 }
 
 $pageTitle = $profile['display_name'] . ' — Clube do Swing';
@@ -108,59 +115,79 @@ require __DIR__ . '/templates/header.php';
   </div>
 <?php endif; ?>
 
-<?php if ($showAsVisitor && $fotoDestaque): ?>
-  <a href="/ver-foto.php?id=<?= e($fotoDestaque['id']) ?>" class="card" style="display:block;margin-bottom:1.5rem">
-    <div class="photo-media" style="aspect-ratio:1/1;max-height:28rem">
-      <img src="/photo.php?id=<?= e($fotoDestaque['id']) ?>" alt="Foto de <?= e($profile['display_name']) ?>">
-    </div>
-  </a>
-<?php endif; ?>
-
-<div class="card" style="padding:1.5rem;margin-bottom:1.5rem">
-  <div style="display:flex;gap:1rem;align-items:flex-start">
-    <div class="avatar" style="width:4rem;height:4rem;font-size:1.4rem"><?= e(initials($profile['display_name'])) ?></div>
-    <div style="flex:1">
-      <h1 class="font-serif" style="margin-bottom:.25rem"><?= e($profile['display_name']) ?></h1>
-      <div class="text-sm text-muted"><?= e($tipo) ?> · Interesse: <?= e($profile['interest'] ?: '—') ?></div>
-      <div class="text-xs text-muted">No Clube do Swing desde <?= e($desde) ?></div>
-      <?php if ($isOwnProfile && is_exclusive($profile)): ?>
-        <span class="badge badge-gold" style="margin-top:.5rem;display:inline-block">Exclusivo</span>
-      <?php endif; ?>
-    </div>
-  </div>
-  <?php if ($profile['description']): ?>
-    <p class="text-sm" style="margin-top:1rem"><?= nl2br(e($profile['description'])) ?></p>
-  <?php endif; ?>
-
-  <?php if ($isOwnProfile && !$previewMode): ?>
-    <div style="margin-top:1rem">
-      <a href="/perfil.php?preview=1" class="btn btn-outline btn-sm">Ver como terceiros veem meu perfil</a>
-    </div>
-  <?php endif; ?>
-
-  <?php if (!$isOwnProfile): ?>
-    <div style="margin-top:1rem;display:flex;gap:.5rem;flex-wrap:wrap;align-items:center">
-      <?php if ($amigos): ?>
-        <span class="badge badge-gold">Amigos</span>
-        <?php if (is_exclusive($currentUser)): ?>
-          <a href="/chat.php?with=<?= e($profile['id']) ?>" class="btn btn-outline btn-sm">Conversar</a>
-        <?php endif; ?>
-      <?php elseif ($pedidoPendente): ?>
-        <span class="badge">Pedido de amizade enviado</span>
+<div class="profile-header card">
+  <div class="profile-cover">
+    <?php for ($i = 0; $i < 2; $i++): ?>
+      <?php if (isset($fotosCapa[$i])): ?>
+        <a href="/ver-foto.php?id=<?= e($fotosCapa[$i]['id']) ?>" class="profile-cover-half">
+          <img src="/photo.php?id=<?= e($fotosCapa[$i]['id']) ?>" alt="">
+        </a>
       <?php else: ?>
-        <button class="btn btn-outline btn-sm" data-friend-request-btn data-to-id="<?= e($profile['id']) ?>">
-          Adicionar como amigo
-        </button>
+        <div class="profile-cover-half profile-cover-empty"></div>
       <?php endif; ?>
+    <?php endfor; ?>
+  </div>
 
-      <button
-        class="btn btn-sm <?= $seguindo ? 'btn-ghost' : '' ?>"
-        data-follow-btn
-        data-user-id="<?= e($profile['id']) ?>"
-        data-following="<?= $seguindo ? '1' : '0' ?>"
-      ><?= $seguindo ? 'Deixar de seguir' : 'Seguir' ?></button>
+  <div class="profile-avatar-wrap">
+    <div class="avatar profile-avatar"><?= e(initials($profile['display_name'])) ?></div>
+  </div>
+
+  <div class="profile-info">
+    <h1 class="font-serif" style="text-align:center;margin-bottom:0">
+      <?= e($profile['display_name']) ?>
+      <?php if ($isOwnProfile && is_exclusive($profile)): ?>
+        <span class="badge badge-gold" style="vertical-align:middle">Exclusivo</span>
+      <?php endif; ?>
+    </h1>
+
+    <div class="profile-stats">
+      <div><strong><?= $qtdVisualizacoes ?></strong><span>visualizações</span></div>
+      <div><strong><?= $qtdSeguindo ?></strong><span>seguindo</span></div>
+      <div><strong><?= $qtdSeguidores ?></strong><span>seguidores</span></div>
     </div>
-  <?php endif; ?>
+
+    <div class="profile-meta">
+      <div class="profile-meta-row"><?= nav_icon('user') ?> <?= e($tipo) ?></div>
+      <?php if ($profile['interest']): ?>
+        <div class="profile-meta-row"><?= nav_icon('search') ?> Busca: <?= e($profile['interest']) ?></div>
+      <?php endif; ?>
+      <div class="profile-meta-row"><?= nav_icon('star') ?> No Clube do Swing desde <?= e($desde) ?></div>
+    </div>
+
+    <?php if ($profile['description']): ?>
+      <p class="text-sm profile-bio"><?= nl2br(e($profile['description'])) ?></p>
+    <?php endif; ?>
+
+    <?php if ($isOwnProfile && !$previewMode): ?>
+      <div class="profile-actions">
+        <a href="/perfil.php?preview=1" class="btn btn-outline btn-sm">Ver como terceiros veem meu perfil</a>
+      </div>
+    <?php endif; ?>
+
+    <?php if (!$isOwnProfile): ?>
+      <div class="profile-actions">
+        <?php if ($amigos): ?>
+          <span class="badge badge-gold">Amigos</span>
+          <?php if (is_exclusive($currentUser)): ?>
+            <a href="/chat.php?with=<?= e($profile['id']) ?>" class="btn btn-outline btn-sm">Conversar</a>
+          <?php endif; ?>
+        <?php elseif ($pedidoPendente): ?>
+          <span class="badge">Pedido de amizade enviado</span>
+        <?php else: ?>
+          <button class="btn btn-outline btn-sm" data-friend-request-btn data-to-id="<?= e($profile['id']) ?>">
+            Adicionar como amigo
+          </button>
+        <?php endif; ?>
+
+        <button
+          class="btn btn-sm <?= $seguindo ? 'btn-ghost' : '' ?>"
+          data-follow-btn
+          data-user-id="<?= e($profile['id']) ?>"
+          data-following="<?= $seguindo ? '1' : '0' ?>"
+        ><?= $seguindo ? 'Deixar de seguir' : 'Seguir' ?></button>
+      </div>
+    <?php endif; ?>
+  </div>
 </div>
 
 <?php if ($isOwnProfile && !$previewMode): ?>
@@ -302,8 +329,35 @@ require __DIR__ . '/templates/header.php';
 
 <?php else: ?>
 
-  <h3 class="text-sm" style="margin-bottom:.75rem">Fotos (<?= count($todasFotos) ?>)</h3>
-  <div class="photo-grid">
+  <div class="tabs">
+    <button class="tab-btn active" data-tab-btn data-tab="principal">Principal</button>
+    <button class="tab-btn" data-tab-btn data-tab="fotos-visitante">Fotos (<?= count($todasFotos) ?>)</button>
+  </div>
+
+  <div data-tab-panel="principal" class="stack">
+    <?php foreach ($todasFotos as $foto): ?>
+      <?php $podeVer = $foto['visibility'] === 'PUBLIC' || $amigos; ?>
+      <article class="card feed-card">
+        <div class="photo-media">
+          <?php if ($podeVer): ?>
+            <a href="/ver-foto.php?id=<?= e($foto['id']) ?>">
+              <img src="/photo.php?id=<?= e($foto['id']) ?>" alt="Foto de <?= e($profile['display_name']) ?>">
+            </a>
+          <?php else: ?>
+            <div class="photo-lock">🔒 Reservada aos amigos</div>
+          <?php endif; ?>
+        </div>
+        <?php if ($podeVer && $foto['caption']): ?>
+          <div class="photo-body"><p class="text-sm"><?= e($foto['caption']) ?></p></div>
+        <?php endif; ?>
+      </article>
+    <?php endforeach; ?>
+    <?php if (!$todasFotos): ?>
+      <p class="text-sm text-muted">Nenhuma foto ainda.</p>
+    <?php endif; ?>
+  </div>
+
+  <div data-tab-panel="fotos-visitante" class="photo-grid" style="display:none">
     <?php foreach ($todasFotos as $foto): ?>
       <?php $podeVer = $foto['visibility'] === 'PUBLIC' || $amigos; ?>
       <?php if ($podeVer): ?>
@@ -317,10 +371,10 @@ require __DIR__ . '/templates/header.php';
         <div class="photo-grid-item photo-grid-locked" title="Reservada aos amigos">🔒</div>
       <?php endif; ?>
     <?php endforeach; ?>
+    <?php if (!$todasFotos): ?>
+      <p class="text-sm text-muted" style="grid-column:1/-1">Nenhuma foto ainda.</p>
+    <?php endif; ?>
   </div>
-  <?php if (!$todasFotos): ?>
-    <p class="text-sm text-muted">Nenhuma foto ainda.</p>
-  <?php endif; ?>
 
 <?php endif; ?>
 
