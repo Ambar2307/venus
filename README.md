@@ -169,6 +169,15 @@ sem reprocessar (a app não quebra, só perde essa otimização).
   (`app/data/cidades_brasil.php`), sem depender de API externa em
   produção. Isso substitui o campo de texto livre antigo, evitando
   cidades digitadas de formas diferentes que não batiam na busca.
+- **Preenchimento automático de cidade/UF**: na Busca, se o usuário
+  logado abrir a página sem nenhum filtro, UF e cidade já vêm
+  preenchidas com o que ele tem cadastrado, e a busca já roda mostrando
+  gente da própria região. No Cadastro, como ainda não existe conta,
+  usa a geolocalização do navegador (`navigator.geolocation`) + a API
+  gratuita BigDataCloud (reverse-geocode-client, sem chave) pra
+  converter a localização atual em cidade/UF — se a pessoa negar a
+  permissão ou o serviço falhar, simplesmente não preenche nada e ela
+  escolhe manualmente, sem travar o cadastro.
 - **Interesse com opções fixas**: em vez de texto livre, cadastro e busca
   usam a mesma lista fechada de opções (Homem, Mulher, Casal (H e M),
   Casal (H e H), Casal (M e M), Travesti, Mulher Trans, Homem Trans —
