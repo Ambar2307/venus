@@ -3,9 +3,13 @@ require_once __DIR__ . '/app/bootstrap.php';
 
 $currentUser = current_user();
 
+// Primeira visita (sem nenhum filtro na URL): pré-preenche UF/cidade com o
+// que o usuário logado já tem cadastrado, pra já mostrar gente da região dele.
+$autoLocalizacao = $currentUser && empty($_GET);
+
 $tipo = (string)($_GET['type'] ?? '');
-$uf = strtoupper(trim((string)($_GET['state'] ?? '')));
-$cidade = trim((string)($_GET['city'] ?? ''));
+$uf = $autoLocalizacao ? (string)$currentUser['state'] : strtoupper(trim((string)($_GET['state'] ?? '')));
+$cidade = $autoLocalizacao ? (string)$currentUser['city'] : trim((string)($_GET['city'] ?? ''));
 $interesse = trim((string)($_GET['interest'] ?? ''));
 $idadeMin = (string)($_GET['idade_min'] ?? '') !== '' ? max(18, (int)$_GET['idade_min']) : null;
 $idadeMax = (string)($_GET['idade_max'] ?? '') !== '' ? min(120, (int)$_GET['idade_max']) : null;
@@ -119,6 +123,12 @@ require __DIR__ . '/templates/header.php';
 </form>
 
 <?php if ($temFiltro): ?>
+  <?php if ($autoLocalizacao): ?>
+    <p class="text-xs text-muted" style="margin-bottom:.5rem">
+      Mostrando perfis de <?= e($cidade) ?>/<?= e($uf) ?>, sua região cadastrada.
+      Mude os filtros acima pra buscar em outro lugar.
+    </p>
+  <?php endif; ?>
   <h3 class="text-sm" style="margin-bottom:.75rem">Resultados (<?= count($resultados) ?>)</h3>
   <div class="search-grid">
     <?php foreach ($resultados as $r): ?>
@@ -154,7 +164,7 @@ require __DIR__ . '/templates/header.php';
       </div>
     <?php endforeach; ?>
     <?php if (!$resultados): ?>
-      <p class="text-sm text-muted">Nenhum perfil encontrado com esses filtros.</p>
+      <p class="text-sm text-muted" style="grid-column:1/-1">Nenhum perfil encontrado com esses filtros.</p>
     <?php endif; ?>
   </div>
 <?php else: ?>

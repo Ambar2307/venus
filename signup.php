@@ -71,7 +71,8 @@ require __DIR__ . '/templates/header.php';
   <div class="form" style="flex-direction:row;gap:.75rem">
     <label class="text-sm text-muted" style="flex:1">
       UF
-      <select class="input" name="state" required data-state-select data-city-target="city-select">
+      <select class="input" name="state" required data-state-select data-city-target="city-select"
+              <?= ($_POST['state'] ?? '') === '' ? 'data-autodetect-location' : '' ?>>
         <option value="">UF</option>
         <?php foreach (BRAZIL_STATES as $uf): ?>
           <option value="<?= e($uf) ?>" <?= ($_POST['state'] ?? '') === $uf ? 'selected' : '' ?>><?= e($uf) ?></option>
@@ -88,6 +89,7 @@ require __DIR__ . '/templates/header.php';
       </select>
     </label>
   </div>
+  <p class="text-xs text-muted" data-location-status style="display:none;margin-top:-.5rem"></p>
 
   <p class="text-xs text-muted" style="margin:.5rem 0 0">
     Os dados abaixo são sigilosos: ficam guardados só para verificação

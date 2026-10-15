@@ -287,35 +287,79 @@
   });
 
   // --- UF -> cidade em cascata (cadastro e busca) ---
+  function carregarCidades(citySelect, uf, placeholder) {
+    citySelect.innerHTML = "";
+    if (!uf) {
+      citySelect.appendChild(new Option("Escolha a UF primeiro", ""));
+      return Promise.resolve([]);
+    }
+    citySelect.appendChild(new Option("Carregando...", ""));
+    return fetch("/api/cities.php?uf=" + encodeURIComponent(uf))
+      .then(function (res) { return res.json(); })
+      .then(function (data) {
+        citySelect.innerHTML = "";
+        citySelect.appendChild(new Option(placeholder, ""));
+        var cidades = data.cidades || [];
+        cidades.forEach(function (cidade) {
+          citySelect.appendChild(new Option(cidade, cidade));
+        });
+        return cidades;
+      })
+      .catch(function () {
+        citySelect.innerHTML = "";
+        citySelect.appendChild(new Option("Erro ao carregar cidades", ""));
+        return [];
+      });
+  }
+
   document.querySelectorAll("[data-state-select]").forEach(function (select) {
     var citySelect = document.getElementById(select.getAttribute("data-city-target"));
     if (!citySelect) return;
+    var placeholder = citySelect.getAttribute("data-empty-label") || "Selecione a cidade";
 
     select.addEventListener("change", function () {
-      var uf = select.value;
-      var placeholder = citySelect.getAttribute("data-empty-label") || "Selecione a cidade";
-      citySelect.innerHTML = "";
-
-      if (!uf) {
-        citySelect.appendChild(new Option("Escolha a UF primeiro", ""));
-        return;
-      }
-
-      citySelect.appendChild(new Option("Carregando...", ""));
-      fetch("/api/cities.php?uf=" + encodeURIComponent(uf))
-        .then(function (res) { return res.json(); })
-        .then(function (data) {
-          citySelect.innerHTML = "";
-          citySelect.appendChild(new Option(placeholder, ""));
-          (data.cidades || []).forEach(function (cidade) {
-            citySelect.appendChild(new Option(cidade, cidade));
-          });
-        })
-        .catch(function () {
-          citySelect.innerHTML = "";
-          citySelect.appendChild(new Option("Erro ao carregar cidades", ""));
-        });
+      carregarCidades(citySelect, select.value, placeholder);
     });
+
+    // --- Autodetectar cidade/UF pela geolocalização do navegador (cadastro) ---
+    if (select.hasAttribute("data-autodetect-location") && navigator.geolocation) {
+      var status = document.querySelector("[data-location-status]");
+      var mostrarStatus = function (msg) {
+        if (!status) return;
+        status.textContent = msg;
+        status.style.display = msg ? "" : "none";
+      };
+
+      mostrarStatus("Detectando sua localização...");
+      navigator.geolocation.getCurrentPosition(
+        function (pos) {
+          var url = "https://api.bigdatacloud.net/data/reverse-geocode-client?latitude="
+            + pos.coords.latitude + "&longitude=" + pos.coords.longitude + "&localityLanguage=pt";
+          fetch(url)
+            .then(function (res) { return res.json(); })
+            .then(function (data) {
+              var uf = (data.principalSubdivisionCode || "").replace("BR-", "");
+              var cidade = data.city || data.locality || "";
+              if (!uf) {
+                mostrarStatus("");
+                return;
+              }
+              select.value = uf;
+              carregarCidades(citySelect, uf, placeholder).then(function (cidades) {
+                if (cidade && cidades.indexOf(cidade) !== -1) {
+                  citySelect.value = cidade;
+                  mostrarStatus("Localização detectada: " + cidade + "/" + uf + ". Confira e corrija se precisar.");
+                } else {
+                  mostrarStatus("UF detectada: " + uf + ". Escolha sua cidade na lista.");
+                }
+              });
+            })
+            .catch(function () { mostrarStatus(""); });
+        },
+        function () { mostrarStatus(""); },
+        { timeout: 8000 }
+      );
+    }
   });
 
   // --- Chat interno (polling) ---
