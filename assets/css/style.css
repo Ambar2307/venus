@@ -600,6 +600,34 @@ textarea.input {
   transform: scale(1.05);
 }
 
+.user-thumb {
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 999px;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: var(--surface-2);
+}
+
+.user-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.user-thumb-noimg {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--gold), var(--wine));
+  color: #1a1410;
+  font-family: Georgia, serif;
+  font-weight: 600;
+}
+
 .search-card-noimg {
   width: 100%;
   height: 100%;

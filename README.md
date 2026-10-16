@@ -78,6 +78,15 @@ templates/                                      → cabeçalho/rodapé HTML reap
   por nome ou e-mail e suspende/reativa com um clique. Conta suspensa não
   consegue mais logar (mensagem de erro genérica, sem revelar que foi
   banida). Nenhuma conta consegue suspender a si mesma.
+- **Lista de usuários por estado, com dados cadastrados** (`admin/usuarios.php`
+  + `admin/usuario.php`): a lista de usuários agora é agrupada por UF, com
+  miniatura da foto de capa (ou iniciais) e link direto pro perfil público de
+  cada um, além de um filtro por estado. Cada linha tem um link "Ver dados
+  cadastrados" que abre uma página só para administradores com o dossiê
+  completo da conta — e-mail, telefone, CPF formatado, data de nascimento e
+  idade calculada, cidade/UF, data de cadastro, data de aceite dos termos,
+  quantidade de fotos publicadas e de denúncias recebidas. Esses dados
+  continuam sigilosos pra qualquer usuário comum; só aparecem aqui.
 - **LGPD**: cadastro exige aceite explícito de Termos de Uso e Política de
   Privacidade (`termos.php`, `privacidade.php`), com o horário do aceite
   gravado (`users.terms_accepted_at`). Toda conta pode ser excluída pelo
