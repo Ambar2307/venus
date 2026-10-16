@@ -25,13 +25,19 @@ CREATE TABLE IF NOT EXISTS users (
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- avatar_photo_id/cover_photo_1_id/cover_photo_2_id ganham FOREIGN KEY mais
+-- abaixo neste arquivo, via ALTER TABLE, depois que a tabela photos existir.
 CREATE TABLE IF NOT EXISTS profiles (
   id CHAR(36) PRIMARY KEY,
   user_id CHAR(36) NOT NULL UNIQUE,
   display_name VARCHAR(80) NOT NULL,
+  display_name_changed_at DATETIME NULL,
   type ENUM('COUPLE','SINGLE_WOMAN','SINGLE_MAN') NOT NULL,
   interest VARCHAR(255) NULL,
   description TEXT NULL,
+  avatar_photo_id CHAR(36) NULL,
+  cover_photo_1_id CHAR(36) NULL,
+  cover_photo_2_id CHAR(36) NULL,
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -181,3 +187,11 @@ CREATE TABLE IF NOT EXISTS messages (
   FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE CASCADE,
   INDEX idx_messages_conversation (conversation_id, sent_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Foto de perfil (avatar) e as 2 fotos fixas no mural são escolhidas pelo
+-- próprio usuário entre suas fotos aprovadas; ON DELETE SET NULL pra, se a
+-- foto escolhida for excluída, só voltar ao estado padrão em vez de dar erro.
+ALTER TABLE profiles
+  ADD CONSTRAINT fk_profiles_avatar_photo FOREIGN KEY (avatar_photo_id) REFERENCES photos(id) ON DELETE SET NULL,
+  ADD CONSTRAINT fk_profiles_cover_photo_1 FOREIGN KEY (cover_photo_1_id) REFERENCES photos(id) ON DELETE SET NULL,
+  ADD CONSTRAINT fk_profiles_cover_photo_2 FOREIGN KEY (cover_photo_2_id) REFERENCES photos(id) ON DELETE SET NULL;

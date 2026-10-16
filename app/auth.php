@@ -154,6 +154,38 @@ function register_failed_login(string $userId, int $currentCount): void
         ->execute([$newCount, $userId]);
 }
 
+/** Dias que o usuário precisa esperar entre uma troca de nome de exibição e a próxima. */
+const DISPLAY_NAME_CHANGE_COOLDOWN_DAYS = 365;
+
+/**
+ * Troca o nome de exibição do usuário, respeitando o limite de 1x por ano.
+ * Lança RuntimeException se o nome for inválido ou se o prazo ainda não tiver passado.
+ */
+function update_display_name(string $userId, string $newName): void
+{
+    $newName = trim($newName);
+    if ($newName === '' || mb_strlen($newName) > 80) {
+        throw new RuntimeException('Informe um nome válido (até 80 caracteres).');
+    }
+
+    $stmt = db()->prepare('SELECT display_name_changed_at FROM profiles WHERE user_id = ?');
+    $stmt->execute([$userId]);
+    $changedAt = $stmt->fetchColumn();
+
+    if ($changedAt) {
+        $proximaData = strtotime($changedAt) + DISPLAY_NAME_CHANGE_COOLDOWN_DAYS * 86400;
+        if (time() < $proximaData) {
+            throw new RuntimeException(
+                'Você já alterou seu nome recentemente. Só poderá mudar de novo em ' .
+                date('d/m/Y', $proximaData) . '.'
+            );
+        }
+    }
+
+    $stmt = db()->prepare('UPDATE profiles SET display_name = ?, display_name_changed_at = NOW() WHERE user_id = ?');
+    $stmt->execute([$newName, $userId]);
+}
+
 function logout_user(): void
 {
     $_SESSION = [];

@@ -601,4 +601,26 @@
       });
     });
   })();
+
+  // --- Mostrar/esconder um bloco simples (ex.: formulário de trocar nome) ---
+  document.querySelectorAll("[data-toggle-btn]").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var target = document.getElementById(btn.getAttribute("data-toggle-target"));
+      if (target) target.hidden = !target.hidden;
+    });
+  });
+
+  // --- Escolher foto de perfil / fotos fixas no mural ---
+  document.querySelectorAll("[data-set-profile-photo-btn]").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var slot = btn.getAttribute("data-slot");
+      var photoId = btn.getAttribute("data-photo-id");
+      var active = btn.getAttribute("data-active") === "1";
+      postJSON("/api/profile_photo.php", { slot: slot, photo_id: active ? null : photoId })
+        .then(function () {
+          window.location.reload();
+        })
+        .catch(handleError);
+    });
+  });
 })();

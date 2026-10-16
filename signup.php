@@ -45,6 +45,9 @@ require __DIR__ . '/templates/auth-header.php';
   <?= csrf_field() ?>
   <input class="input" name="display_name" placeholder="Nome fictício" required
          value="<?= e($_POST['display_name'] ?? '') ?>">
+  <p class="text-xs text-muted" style="margin-top:-.5rem">
+    Escolha com cuidado: esse nome só pode ser alterado 1x por ano depois do cadastro.
+  </p>
 
   <select class="input" name="type" required>
     <option value="">Casal ou solteiro(a)?</option>

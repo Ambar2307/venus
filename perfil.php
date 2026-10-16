@@ -7,7 +7,8 @@ $profileId = (string)($_GET['id'] ?? $currentUser['id']);
 
 $stmt = db()->prepare(
     'SELECT u.id, u.created_at, u.plan, u.plan_valid_until,
-            p.display_name, p.type, p.interest, p.description
+            p.display_name, p.display_name_changed_at, p.type, p.interest, p.description,
+            p.avatar_photo_id, p.cover_photo_1_id, p.cover_photo_2_id
      FROM users u JOIN profiles p ON p.user_id = u.id
      WHERE u.id = ?'
 );
@@ -71,6 +72,21 @@ if ($isOwnProfile && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['publ
     }
 }
 
+$erroNome = null;
+if ($isOwnProfile && !$previewMode && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['alterar_nome'])) {
+    if (!verify_csrf($_POST['csrf_token'] ?? null)) {
+        $erroNome = 'Sessão expirada, recarregue a página e tente novamente.';
+    } else {
+        try {
+            update_display_name($currentUser['id'], (string)($_POST['display_name'] ?? ''));
+            flash('success', 'Nome atualizado!');
+            redirect('/perfil.php');
+        } catch (RuntimeException $e) {
+            $erroNome = $e->getMessage();
+        }
+    }
+}
+
 $tipo = PROFILE_TYPE_LABEL[$profile['type']] ?? '';
 $desde = date('m/Y', strtotime($profile['created_at']));
 
@@ -87,7 +103,29 @@ $fotosVisiveis = $podeVerTudo ? $todasFotos : array_values(array_filter(
     $todasFotos,
     fn($f) => $f['visibility'] === 'PUBLIC' || $amigos
 ));
-$fotosCapa = array_slice($fotosVisiveis, 0, 2);
+
+// As 2 fotos do mural e o avatar usam a escolha do dono do perfil quando
+// disponível; quando não tiver (ou a foto fixada não estiver visível pra
+// quem está olhando agora), cai de volta nas fotos mais recentes.
+$fotoCapa1 = resolve_pinned_photo($profile['cover_photo_1_id'], $fotosVisiveis);
+$fotoCapa2 = resolve_pinned_photo($profile['cover_photo_2_id'], $fotosVisiveis);
+$fotoAvatar = resolve_pinned_photo($profile['avatar_photo_id'], $fotosVisiveis);
+
+$idsJaUsados = array_filter([$fotoCapa1['id'] ?? null, $fotoCapa2['id'] ?? null]);
+$poolReserva = array_values(array_filter($fotosVisiveis, fn($f) => !in_array($f['id'], $idsJaUsados, true)));
+if (!$fotoCapa1) {
+    $fotoCapa1 = array_shift($poolReserva);
+}
+if (!$fotoCapa2) {
+    $fotoCapa2 = array_shift($poolReserva);
+}
+$fotosCapa = array_values(array_filter([$fotoCapa1, $fotoCapa2]));
+
+$podeAlterarNomeAgora = empty($profile['display_name_changed_at'])
+    || (strtotime($profile['display_name_changed_at']) + DISPLAY_NAME_CHANGE_COOLDOWN_DAYS * 86400) <= time();
+$proximaDataNome = !empty($profile['display_name_changed_at'])
+    ? date('d/m/Y', strtotime($profile['display_name_changed_at']) + DISPLAY_NAME_CHANGE_COOLDOWN_DAYS * 86400)
+    : null;
 
 $qtdSeguindo = count_following($profile['id']);
 $qtdSeguidores = count_followers($profile['id']);
@@ -129,16 +167,50 @@ require __DIR__ . '/templates/header.php';
   </div>
 
   <div class="profile-avatar-wrap">
-    <div class="avatar profile-avatar"><?= e(initials($profile['display_name'])) ?></div>
+    <?php if ($fotoAvatar): ?>
+      <div class="avatar profile-avatar profile-avatar-photo">
+        <img src="/photo.php?id=<?= e($fotoAvatar['id']) ?>" alt="Foto de <?= e($profile['display_name']) ?>">
+      </div>
+    <?php else: ?>
+      <div class="avatar profile-avatar"><?= e(initials($profile['display_name'])) ?></div>
+    <?php endif; ?>
   </div>
 
   <div class="profile-info">
-    <h1 class="font-serif" style="text-align:center;margin-bottom:0">
+    <h1 class="font-serif profile-name" style="text-align:center;margin-bottom:0">
       <?= e($profile['display_name']) ?>
       <?php if ($isOwnProfile && is_exclusive($profile)): ?>
         <span class="badge badge-gold" style="vertical-align:middle">Exclusivo</span>
       <?php endif; ?>
     </h1>
+
+    <?php if ($isOwnProfile && !$previewMode): ?>
+      <div style="margin-top:.35rem">
+        <button type="button" class="btn btn-ghost btn-sm" data-toggle-btn data-toggle-target="editar-nome-box">
+          ✏️ Alterar nome
+        </button>
+        <div id="editar-nome-box" hidden style="margin-top:.5rem">
+          <form method="post" class="form" style="max-width:320px;margin:0 auto">
+            <?= csrf_field() ?>
+            <input type="hidden" name="alterar_nome" value="1">
+            <input class="input" type="text" name="display_name" maxlength="80" required
+                   value="<?= e($profile['display_name']) ?>" <?= $podeAlterarNomeAgora ? '' : 'disabled' ?>>
+            <?php if ($podeAlterarNomeAgora): ?>
+              <p class="text-xs text-muted">O nome só pode ser alterado 1x por ano.</p>
+            <?php else: ?>
+              <p class="text-xs text-muted">
+                Você já alterou seu nome recentemente. Só poderá mudar de novo em
+                <?= e($proximaDataNome) ?>.
+              </p>
+            <?php endif; ?>
+            <?php if ($erroNome): ?><p class="error"><?= e($erroNome) ?></p><?php endif; ?>
+            <button class="btn btn-sm" type="submit" <?= $podeAlterarNomeAgora ? '' : 'disabled' ?>>
+              Salvar novo nome
+            </button>
+          </form>
+        </div>
+      </div>
+    <?php endif; ?>
 
     <div class="profile-stats">
       <div><strong><?= $qtdVisualizacoes ?></strong><span>visualizações</span></div>
@@ -259,6 +331,34 @@ require __DIR__ . '/templates/header.php';
                 Excluir
               </button>
             </div>
+            <?php if ($foto['moderation_status'] === 'APPROVED'): ?>
+              <div class="photo-actions" style="margin-top:.4rem">
+                <button
+                  type="button"
+                  class="btn btn-sm <?= $profile['avatar_photo_id'] === $foto['id'] ? '' : 'btn-ghost' ?>"
+                  data-set-profile-photo-btn data-slot="avatar" data-photo-id="<?= e($foto['id']) ?>"
+                  data-active="<?= $profile['avatar_photo_id'] === $foto['id'] ? '1' : '0' ?>"
+                >
+                  <?= $profile['avatar_photo_id'] === $foto['id'] ? '✓ Foto de perfil' : 'Usar como foto de perfil' ?>
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-sm <?= $profile['cover_photo_1_id'] === $foto['id'] ? '' : 'btn-ghost' ?>"
+                  data-set-profile-photo-btn data-slot="cover1" data-photo-id="<?= e($foto['id']) ?>"
+                  data-active="<?= $profile['cover_photo_1_id'] === $foto['id'] ? '1' : '0' ?>"
+                >
+                  <?= $profile['cover_photo_1_id'] === $foto['id'] ? '✓ Mural (1)' : 'Fixar no mural (1)' ?>
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-sm <?= $profile['cover_photo_2_id'] === $foto['id'] ? '' : 'btn-ghost' ?>"
+                  data-set-profile-photo-btn data-slot="cover2" data-photo-id="<?= e($foto['id']) ?>"
+                  data-active="<?= $profile['cover_photo_2_id'] === $foto['id'] ? '1' : '0' ?>"
+                >
+                  <?= $profile['cover_photo_2_id'] === $foto['id'] ? '✓ Mural (2)' : 'Fixar no mural (2)' ?>
+                </button>
+              </div>
+            <?php endif; ?>
           </div>
         </article>
       <?php endforeach; ?>

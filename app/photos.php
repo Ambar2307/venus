@@ -41,6 +41,57 @@ function delete_photo(string $userId, string $photoId): void
     }
 }
 
+/**
+ * Encontra, dentro de uma lista de fotos já filtrada por quem pode ver
+ * (visibilidade), a foto com o id fixado — ou null se não houver id, ou se
+ * a foto fixada não estiver (mais) nessa lista (ex.: é "só amigos" e quem
+ * está olhando não é amigo).
+ */
+function resolve_pinned_photo(?string $pinnedId, array $fotosVisiveis): ?array
+{
+    if (!$pinnedId) {
+        return null;
+    }
+    foreach ($fotosVisiveis as $foto) {
+        if ($foto['id'] === $pinnedId) {
+            return $foto;
+        }
+    }
+    return null;
+}
+
+const PROFILE_PHOTO_SLOT_COLUMN = [
+    'avatar' => 'avatar_photo_id',
+    'cover1' => 'cover_photo_1_id',
+    'cover2' => 'cover_photo_2_id',
+];
+
+/**
+ * Define (ou remove, se $photoId for null) qual foto do usuário fica fixa
+ * como avatar ou em uma das 2 posições do mural. Só aceita fotos aprovadas
+ * e que pertençam ao próprio usuário. Lança RuntimeException em caso de erro.
+ */
+function set_profile_photo_slot(string $userId, string $slot, ?string $photoId): void
+{
+    if (!isset(PROFILE_PHOTO_SLOT_COLUMN[$slot])) {
+        throw new RuntimeException('Posição inválida.');
+    }
+    $coluna = PROFILE_PHOTO_SLOT_COLUMN[$slot];
+
+    if ($photoId !== null) {
+        $stmt = db()->prepare(
+            "SELECT id FROM photos WHERE id = ? AND user_id = ? AND moderation_status = 'APPROVED'"
+        );
+        $stmt->execute([$photoId, $userId]);
+        if (!$stmt->fetch()) {
+            throw new RuntimeException('Essa foto não está disponível para usar aqui.');
+        }
+    }
+
+    $stmt = db()->prepare("UPDATE profiles SET {$coluna} = ? WHERE user_id = ?");
+    $stmt->execute([$photoId, $userId]);
+}
+
 /** Exclui um comentário (uso administrativo — a permissão é checada por quem chama). */
 function delete_comment(string $commentId): void
 {

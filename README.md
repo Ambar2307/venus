@@ -98,6 +98,25 @@ templates/                                      → cabeçalho/rodapé HTML reap
   publicar; o recorte final é feito no navegador (`<canvas>`) e enviado já
   pronto, sem precisar de nenhuma biblioteca externa. Fotos que já encaixam
   na proporção certa pulam esse passo e são enviadas direto.
+- **Cabeçalho do perfil maior, com foto de perfil e mural escolhidos pelo
+  usuário**: a capa (`profiles.cover_photo_1_id`/`cover_photo_2_id`) e o
+  avatar (`profiles.avatar_photo_id`) deixaram de ser automáticos — em "Minhas
+  fotos", cada foto aprovada ganha 3 botões ("Usar como foto de perfil",
+  "Fixar no mural (1)", "Fixar no mural (2)") pra escolher exatamente o que
+  fica fixo ali (`api/profile_photo.php`, `set_profile_photo_slot()` em
+  `app/photos.php`); sem escolha, cai de volta nas fotos mais recentes como
+  antes. O quadro da capa cresceu (18rem, metade da área do cabeçalho) e o
+  avatar cresceu proporcionalmente (11rem) mostrando a foto escolhida em vez
+  de só iniciais; o nome ficou com fonte um pouco menor pra equilibrar.
+  Se a foto fixada deixar de estar visível pra quem olha (ex.: virou "só
+  amigos" e o visitante não é amigo), volta ao padrão automático sozinho.
+- **Nome de exibição alterável só 1x por ano**: `update_display_name()` em
+  `app/auth.php` bloqueia a troca por 365 dias a partir da última alteração
+  (`profiles.display_name_changed_at`), validado sempre no servidor. Em "Meu
+  perfil", um botão "✏️ Alterar nome" abre um formulário pequeno; quando o
+  prazo não passou, o campo some desabilitado com a data exata em que a
+  troca volta a ser permitida. No cadastro (`signup.php`), um aviso abaixo
+  do campo de nome já avisa dessa regra antes de criar o perfil.
   Privacidade (`termos.php`, `privacidade.php`), com o horário do aceite
   gravado (`users.terms_accepted_at`). Toda conta pode ser excluída pelo
   próprio usuário na página de Perfil — apaga o registro no banco (perfil,
