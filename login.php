@@ -2,7 +2,7 @@
 require_once __DIR__ . '/app/bootstrap.php';
 
 if (current_user()) {
-    redirect('/index.php');
+    redirect('/feed.php');
 }
 
 $erro = null;
@@ -14,7 +14,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         $ok = attempt_login((string)($_POST['email'] ?? ''), (string)($_POST['password'] ?? ''));
         if ($ok) {
-            redirect('/index.php');
+            redirect('/feed.php');
         }
         $erro = 'E-mail ou senha inválidos.';
     }

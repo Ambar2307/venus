@@ -2,7 +2,7 @@
 require_once __DIR__ . '/app/bootstrap.php';
 
 if (current_user()) {
-    redirect('/index.php');
+    redirect('/feed.php');
 }
 
 $enviado = false;

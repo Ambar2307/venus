@@ -211,7 +211,7 @@
       var password = deleteForm.querySelector('input[name="password"]').value;
       postJSON("/api/account_delete.php", { password: password })
         .then(function () {
-          window.location.href = "/index.php";
+          window.location.href = "/";
         })
         .catch(handleError);
     });

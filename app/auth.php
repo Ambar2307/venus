@@ -242,7 +242,7 @@ function require_admin_page(): array
 {
     $user = require_login_page();
     if (!is_admin($user)) {
-        redirect('/index.php');
+        redirect('/feed.php');
     }
     return $user;
 }

@@ -11,7 +11,8 @@ como a Locaweb.
 ## Estrutura
 
 ```
-index.php, login.php, signup.php, logout.php,
+index.php                                       → landing page pública (visitante não logado)
+feed.php, login.php, signup.php, logout.php,
 perfil.php, amigos.php, buscar.php,
 notificacoes.php, chat.php, planos.php          → páginas
 admin/moderacao.php                             → aprovar/rejeitar fotos pendentes (só para usuários com is_admin=1)
@@ -40,6 +41,13 @@ templates/                                      → cabeçalho/rodapé HTML reap
   entra como `PENDING` até ser aprovada manualmente no banco.
 - **Filtro do feed**: abas "Todos" / "Do meu estado" / "Quem eu sigo" logo
   abaixo do título, só para quem está logado (`app/photos.php::fetch_feed()`).
+- **Landing page pública (`index.php`)**: quem acessa o domínio sem estar
+  logado vê primeiro uma página de apresentação do site (hero, "como
+  funciona", diferenciais, chamada final) com botões "Entrar" e "Criar perfil
+  grátis" — só depois de clicar é que chega à tela de login/cadastro, como em
+  sites tradicionais de relacionamento. O feed (agora em `feed.php`) continua
+  acessível a visitantes (sem curtir/comentar), mas deixou de ser a primeira
+  tela. Quem já está logado que acessar `/` é redirecionado direto pro feed.
 - Visibilidade "só amigos": a URL da foto só é enviada ao navegador se o
   `viewer` for o dono ou amigo aceito (`app/friends.php`) — checado sempre no
   servidor, nunca confiando no cliente.
@@ -148,7 +156,7 @@ sem reprocessar (a app não quebra, só perde essa otimização).
   abas: "Minhas fotos" (upload + lista de todas as fotos próprias, com
   status "Aguardando aprovação"/"Aprovada"/"Rejeitada" e botão de
   excluir), "Meus amigos" (amizades aceitas), "Meus seguidores",
-  "Recomendados" e "Visitas recebidas". O feed (`index.php`) virou
+  "Recomendados" e "Visitas recebidas". O feed (`feed.php`) virou
   puramente uma vitrine das últimas fotos aprovadas da comunidade, sem
   nenhum formulário — só mostra um aviso com link para `/perfil.php`
   quando o usuário logado ainda não publicou nenhuma foto própria.
@@ -233,7 +241,9 @@ sem reprocessar (a app não quebra, só perde essa otimização).
 5. **PHP**: confirme na seção "Selecionar Versão do PHP" do cPanel que está
    em PHP 8.x com as extensões `pdo_mysql`, `mbstring`, `fileinfo` e `gd`
    ativadas (todas vêm habilitadas por padrão nos planos comuns).
-6. Acesse o domínio — a página inicial (`index.php`) já é o feed.
+6. Acesse o domínio — a página inicial (`index.php`) é a landing page pública;
+   o feed fica em `/feed.php` e quem já está logado é redirecionado pra lá
+   automaticamente ao acessar `/`.
 
 Nenhum passo de build é necessário: não há `npm install`, não há
 `composer install`, é só enviar os arquivos `.php` e o servidor já entende.

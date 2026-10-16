@@ -15,7 +15,7 @@ $activePage = $activePage ?? '';
 <body data-user-id="<?= e($currentUser['id'] ?? '') ?>" data-is-admin="<?= ($currentUser && is_admin($currentUser)) ? '1' : '0' ?>">
 <div class="layout">
   <aside class="sidebar">
-    <a href="/index.php" class="brand">
+    <a href="<?= $currentUser ? '/feed.php' : '/' ?>" class="brand">
       <svg width="26" height="26" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
         <circle cx="10" cy="14" r="8.5" stroke="#a9782f" stroke-width="1.7"/>
         <circle cx="18" cy="14" r="8.5" stroke="#8a3f52" stroke-width="1.7"/>
@@ -23,7 +23,7 @@ $activePage = $activePage ?? '';
       <span>Clube do Swing</span>
     </a>
     <nav class="nav-links">
-      <a href="/index.php" class="<?= $activePage === 'feed' ? 'active' : '' ?>">
+      <a href="/feed.php" class="<?= $activePage === 'feed' ? 'active' : '' ?>">
         <?= nav_icon('home') ?><span>Feed</span>
       </a>
       <a href="/buscar.php" class="<?= $activePage === 'buscar' ? 'active' : '' ?>">
