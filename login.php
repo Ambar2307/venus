@@ -22,7 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 $pageTitle = 'Entrar — Clube do Swing';
 $activePage = 'login';
-require __DIR__ . '/templates/header.php';
+require __DIR__ . '/templates/auth-header.php';
 ?>
 
 <div class="auth-center">
@@ -52,4 +52,4 @@ require __DIR__ . '/templates/header.php';
   </div>
 </div>
 
-<?php require __DIR__ . '/templates/footer.php'; ?>
+<?php require __DIR__ . '/templates/auth-footer.php'; ?>

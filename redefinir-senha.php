@@ -27,7 +27,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 $pageTitle = 'Redefinir senha — Clube do Swing';
-require __DIR__ . '/templates/header.php';
+require __DIR__ . '/templates/auth-header.php';
 ?>
 
 <h1 class="font-serif">Redefinir senha</h1>
@@ -52,4 +52,4 @@ require __DIR__ . '/templates/header.php';
   </form>
 <?php endif; ?>
 
-<?php require __DIR__ . '/templates/footer.php'; ?>
+<?php require __DIR__ . '/templates/auth-footer.php'; ?>

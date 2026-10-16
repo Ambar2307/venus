@@ -24,7 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 $pageTitle = 'Recuperar senha — Clube do Swing';
 $activePage = 'login';
-require __DIR__ . '/templates/header.php';
+require __DIR__ . '/templates/auth-header.php';
 ?>
 
 <h1 class="font-serif">Recuperar senha</h1>
@@ -47,4 +47,4 @@ require __DIR__ . '/templates/header.php';
   <a href="/login.php" class="text-gold">Voltar para o login</a>
 </p>
 
-<?php require __DIR__ . '/templates/footer.php'; ?>
+<?php require __DIR__ . '/templates/auth-footer.php'; ?>

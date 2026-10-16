@@ -36,7 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 $pageTitle = 'Criar perfil — Clube do Swing';
 $activePage = 'signup';
-require __DIR__ . '/templates/header.php';
+require __DIR__ . '/templates/auth-header.php';
 ?>
 
 <h1 class="font-serif">Criar perfil</h1>
@@ -135,4 +135,4 @@ require __DIR__ . '/templates/header.php';
   <button class="btn" type="submit">Criar perfil com Acesso Livre</button>
 </form>
 
-<?php require __DIR__ . '/templates/footer.php'; ?>
+<?php require __DIR__ . '/templates/auth-footer.php'; ?>
