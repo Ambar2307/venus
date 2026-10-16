@@ -219,7 +219,18 @@ require __DIR__ . '/templates/header.php';
       <div><strong><?= $qtdVisualizacoes ?></strong><span>visualizações</span></div>
       <div><strong><?= $qtdSeguindo ?></strong><span>seguindo</span></div>
       <div><strong><?= $qtdSeguidores ?></strong><span>seguidores</span></div>
-      <div><strong><?= $qtdRecomendacoes ?></strong><span>recomendações</span></div>
+      <?php if ($isOwnProfile && !$previewMode): ?>
+        <div>
+          <a href="/amigos.php#recomendacoes" style="text-decoration:none"><strong><?= $qtdRecomendacoes ?></strong></a>
+          <span>recomendações</span>
+        </div>
+        <div>
+          <a href="/amigos.php#visitas" style="text-decoration:none"><strong>?</strong></a>
+          <span>quem visitou seu perfil</span>
+        </div>
+      <?php else: ?>
+        <div><strong><?= $qtdRecomendacoes ?></strong><span>recomendações</span></div>
+      <?php endif; ?>
     </div>
 
     <div class="profile-meta">

@@ -147,6 +147,16 @@ templates/                                      → cabeçalho/rodapé HTML reap
   heurística, então um número de 8 dígitos num outro contexto (ex.: uma
   data "2024-10-16") também pode ser mascarado; prioriza nunca deixar
   passar um telefone de verdade.
+- **Links das recomendações e de "quem visitou seu perfil"**: no cabeçalho
+  do próprio perfil (nunca no de visitante — lá continua texto simples,
+  sem link, sem nenhuma mudança visual), o número de "recomendações" e o
+  novo "?" de "quem visitou seu perfil" viram links pra `/amigos.php`
+  (mesma página de "Amigos e seguidores", agora com as seções "Quem te
+  recomendou" e "Quem visitou seu perfil" — `#recomendacoes` e `#visitas`).
+  "Quem visitou seu perfil" aparece pra qualquer plano, mas só assinante
+  Exclusivo vê a lista de verdade; no plano Livre, a seção mostra um aviso
+  pra assinar em vez da lista (mesma lógica de `is_exclusive()` usada em
+  outras áreas exclusivas do site).
   Privacidade (`termos.php`, `privacidade.php`), com o horário do aceite
   gravado (`users.terms_accepted_at`). Toda conta pode ser excluída pelo
   próprio usuário na página de Perfil — apaga o registro no banco (perfil,

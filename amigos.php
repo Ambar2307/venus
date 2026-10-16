@@ -14,6 +14,8 @@ $stmt->execute([$currentUser['id']]);
 $pendentes = $stmt->fetchAll();
 
 $amigos = list_friends($currentUser['id']);
+$recomendadores = list_recommenders($currentUser['id']);
+$visitantes = is_exclusive($currentUser) ? list_recent_visitors($currentUser['id']) : [];
 
 $busca = trim((string)($_GET['q'] ?? ''));
 $resultados = [];
@@ -87,6 +89,47 @@ require __DIR__ . '/templates/header.php';
   <?php endforeach; ?>
   <?php if (!$amigos): ?>
     <div class="friend-row"><span class="text-sm text-muted">Você ainda não tem amigos.</span></div>
+  <?php endif; ?>
+</div>
+
+<h3 class="text-sm" id="recomendacoes">Quem te recomendou (<?= count($recomendadores) ?>)</h3>
+<div class="card" style="margin-top:1rem;margin-bottom:2rem">
+  <?php foreach ($recomendadores as $r): ?>
+    <div class="friend-row">
+      <a href="/perfil.php?id=<?= e($r['id']) ?>" class="text-sm">
+        <?= e($r['display_name']) ?>
+        <span class="text-xs text-muted"><?= e(PROFILE_TYPE_LABEL[$r['type']] ?? '') ?></span>
+      </a>
+      <span class="text-xs text-muted">desde <?= e(date('d/m/Y', strtotime($r['created_at']))) ?></span>
+    </div>
+  <?php endforeach; ?>
+  <?php if (!$recomendadores): ?>
+    <div class="friend-row"><span class="text-sm text-muted">Ninguém te recomendou publicamente ainda.</span></div>
+  <?php endif; ?>
+</div>
+
+<h3 class="text-sm" id="visitas">Quem visitou seu perfil</h3>
+<div class="card" style="margin-top:1rem">
+  <?php if (!is_exclusive($currentUser)): ?>
+    <div class="friend-row">
+      <span class="text-sm text-muted">
+        Disponível só para assinantes do plano Exclusivo.
+        <a href="/planos.php" class="text-gold">Ver planos</a>.
+      </span>
+    </div>
+  <?php else: ?>
+    <?php foreach ($visitantes as $v): ?>
+      <div class="friend-row">
+        <a href="/perfil.php?id=<?= e($v['id']) ?>" class="text-sm">
+          <?= e($v['display_name']) ?>
+          <span class="text-xs text-muted"><?= e(PROFILE_TYPE_LABEL[$v['type']] ?? '') ?></span>
+        </a>
+        <span class="text-xs text-muted"><?= e(date('d/m/Y H:i', strtotime($v['last_visit']))) ?></span>
+      </div>
+    <?php endforeach; ?>
+    <?php if (!$visitantes): ?>
+      <div class="friend-row"><span class="text-sm text-muted">Ninguém visitou seu perfil ainda.</span></div>
+    <?php endif; ?>
   <?php endif; ?>
 </div>
 
