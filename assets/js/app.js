@@ -151,6 +151,25 @@
     });
   });
 
+  // --- Recomendar / remover recomendação pública ---
+  document.querySelectorAll("[data-recommend-btn]").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var userId = btn.getAttribute("data-user-id");
+      postJSON("/api/recommend.php", { user_id: userId })
+        .then(function (res) {
+          if (res.recomendado) {
+            btn.textContent = "★ Recomendado";
+            btn.classList.add("btn-ghost");
+          } else {
+            btn.textContent = "☆ Recomendar";
+            btn.classList.remove("btn-ghost");
+          }
+          btn.setAttribute("data-recommended", res.recomendado ? "1" : "0");
+        })
+        .catch(handleError);
+    });
+  });
+
   // --- Excluir foto (Meu perfil) ---
   document.querySelectorAll("[data-delete-photo-btn]").forEach(function (btn) {
     btn.addEventListener("click", function () {

@@ -1,11 +1,15 @@
 <?php
 
-/** Cria uma notificação de curtida/comentário. Nunca notifica a si mesmo. */
+/**
+ * Cria uma notificação (curtida, comentário, seguir, pedido de amizade ou
+ * recomendação). $photoId só se aplica a curtida/comentário. Nunca notifica
+ * a si mesmo.
+ */
 function create_notification(
     string $recipientId,
     string $actorId,
     string $type,
-    string $photoId,
+    ?string $photoId = null,
     ?string $commentSnippet = null
 ): void {
     if ($recipientId === $actorId) {
@@ -31,7 +35,7 @@ function list_notifications(string $userId, int $limit = 30): array
         "SELECT n.*, p.display_name AS actor_name, ph.file_path AS photo_file_path
          FROM notifications n
          JOIN profiles p ON p.user_id = n.actor_id
-         JOIN photos ph ON ph.id = n.photo_id
+         LEFT JOIN photos ph ON ph.id = n.photo_id
          WHERE n.user_id = ?
          ORDER BY n.created_at DESC
          LIMIT " . (int)$limit

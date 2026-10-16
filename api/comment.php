@@ -19,6 +19,8 @@ if (mb_strlen($text) > 500) {
     json_response(['erro' => 'Comentário muito longo (máx. 500 caracteres).'], 400);
 }
 
+$text = mask_phone_numbers($text);
+
 $stmt = db()->prepare('SELECT user_id FROM photos WHERE id = ?');
 $stmt->execute([$photoId]);
 $foto = $stmt->fetch();

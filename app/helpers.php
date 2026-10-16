@@ -202,6 +202,28 @@ function only_digits(string $value): string
     return preg_replace('/\D/', '', $value) ?? '';
 }
 
+/**
+ * Mascara qualquer trecho de texto que pareça um número de telefone
+ * (8 a 13 dígitos seguidos, com ou sem parênteses/traço/espaço entre eles),
+ * trocando cada dígito por "*". Usado pra impedir troca de contato nos
+ * comentários das fotos — é uma heurística, não detecção perfeita, então
+ * prefere errar mascarando demais a deixar passar um telefone de verdade.
+ */
+function mask_phone_numbers(string $text): string
+{
+    return preg_replace_callback(
+        '/(?:\(?\d{2,3}\)?[\s.-]*)?\d{4,5}[\s.-]*\d{4}/',
+        function (array $m): string {
+            $digitos = only_digits($m[0]);
+            if (strlen($digitos) < 8 || strlen($digitos) > 13) {
+                return $m[0];
+            }
+            return preg_replace('/\d/', '*', $m[0]);
+        },
+        $text
+    ) ?? $text;
+}
+
 /** Tempo decorrido desde $datetime em formato curto ("agora", "12 min", "3 h", "5 d", ou a data). */
 function tempo_relativo(string $datetime): string
 {

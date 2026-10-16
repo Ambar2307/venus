@@ -160,13 +160,15 @@ CREATE TABLE IF NOT EXISTS profile_visits (
   INDEX idx_profile_visits_visited (visited_id, visited_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Notificação de curtida/comentário recebido numa foto sua.
+-- Notificação de curtida, comentário, seguir, pedido de amizade ou
+-- recomendação. photo_id só existe pra curtida/comentário (fica NULL
+-- nos outros tipos).
 CREATE TABLE IF NOT EXISTS notifications (
   id CHAR(36) PRIMARY KEY,
   user_id CHAR(36) NOT NULL,
   actor_id CHAR(36) NOT NULL,
-  type ENUM('LIKE','COMMENT') NOT NULL,
-  photo_id CHAR(36) NOT NULL,
+  type ENUM('LIKE','COMMENT','FOLLOW','FRIEND_REQUEST','RECOMMEND') NOT NULL,
+  photo_id CHAR(36) NULL,
   comment_snippet VARCHAR(140) NULL,
   read_at DATETIME NULL,
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -174,6 +176,18 @@ CREATE TABLE IF NOT EXISTS notifications (
   FOREIGN KEY (actor_id) REFERENCES users(id) ON DELETE CASCADE,
   FOREIGN KEY (photo_id) REFERENCES photos(id) ON DELETE CASCADE,
   INDEX idx_notifications_user (user_id, read_at, created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Recomendação pública: "eu conheço/gostei desse usuário". Vira referência
+-- visível no perfil de quem foi recomendado.
+CREATE TABLE IF NOT EXISTS recommendations (
+  id CHAR(36) PRIMARY KEY,
+  recommender_id CHAR(36) NOT NULL,
+  recommended_id CHAR(36) NOT NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY uniq_recommendation (recommender_id, recommended_id),
+  FOREIGN KEY (recommender_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (recommended_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS messages (

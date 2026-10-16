@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__ . '/../app/bootstrap.php';
 
-$user = require_exclusive_api();
+$user = require_login_api();
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $withId = (string)($_GET['with'] ?? '');
@@ -48,7 +48,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         json_response(['erro' => 'Usuário não encontrado.'], 404);
     }
 
-    $conversationId = get_or_create_conversation($user['id'], $toId);
+    [$partA, $partB] = $user['id'] < $toId ? [$user['id'], $toId] : [$toId, $user['id']];
+    $stmt = db()->prepare('SELECT id FROM conversations WHERE part_a_id = ? AND part_b_id = ?');
+    $stmt->execute([$partA, $partB]);
+    $conversaExistente = $stmt->fetch();
+
+    if (!is_exclusive($user)) {
+        if (!$conversaExistente) {
+            // Quem não assina não pode começar uma conversa nova — só responder
+            // quando um assinante Exclusivo já tiver chamado primeiro.
+            json_response([
+                'erro' => 'Só assinantes do plano Exclusivo podem iniciar uma conversa nova.',
+                'upgrade' => true,
+            ], 403);
+        }
+        $checagem = pode_mandar_mensagem_gratis($conversaExistente['id'], $user['id']);
+        if (!$checagem['permitido']) {
+            json_response(['erro' => $checagem['motivo'], 'upgrade' => true], 403);
+        }
+    }
+
+    $conversationId = $conversaExistente['id'] ?? get_or_create_conversation($user['id'], $toId);
 
     $stmt = db()->prepare(
         'INSERT INTO messages (id, conversation_id, sender_id, body) VALUES (?, ?, ?, ?)'

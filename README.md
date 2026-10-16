@@ -117,6 +117,36 @@ templates/                                      → cabeçalho/rodapé HTML reap
   prazo não passou, o campo some desabilitado com a data exata em que a
   troca volta a ser permitida. No cadastro (`signup.php`), um aviso abaixo
   do campo de nome já avisa dessa regra antes de criar o perfil.
+- **Notificações para seguir, pedido de amizade e recomendação** (além de
+  curtida/comentário, que já existiam): `create_notification()` em
+  `app/notifications.php` agora aceita `photo_id` opcional, e
+  `notifications.type` ganhou `FOLLOW`, `FRIEND_REQUEST` e `RECOMMEND`
+  (`database/migrations/2026_10_16_add_recommendations_and_more_notifications.sql`).
+  Cada tipo novo aparece em `notificacoes.php` com link pro perfil de quem
+  agiu (pedido de amizade linka pra `/amigos.php`, onde dá pra responder).
+- **Recomendação pública entre usuários**: botão "☆ Recomendar" no perfil de
+  qualquer outra pessoa (vira "★ Recomendado", é alternável como o Seguir),
+  guardado na tabela `recommendations` (`toggle_recommendation()` em
+  `app/social.php`). A contagem de recomendações aparece como uma 4ª
+  estatística no cabeçalho do perfil (pública, serve de referência pra
+  quem está vendo), e o dono tem uma aba "Recomendações recebidas" com a
+  lista de quem o recomendou — separada da aba "Recomendados" já existente
+  (que é a lista automática de sugestões, sem relação com isso).
+- **Chat: 6 mensagens grátis quando um assinante chama alguém do plano
+  Livre**: antes o chat era 100% bloqueado pra quem não assina. Agora,
+  só quem é Exclusivo pode iniciar uma conversa nova (`api/messages.php`),
+  mas a pessoa chamada, mesmo sem assinar, pode responder até
+  `CHAT_FREE_MESSAGE_LIMIT` (6, em `app/limits.php`) mensagens *nessa
+  conversa*; na 7ª tentativa recebe o aviso pra assinar em vez de enviar.
+  `chat.php` mostra quantas mensagens grátis restam e deixa de bloquear a
+  página inteira pra quem já tem conversa iniciada por alguém Exclusivo.
+- **Filtro de número de telefone nos comentários**: `mask_phone_numbers()`
+  em `app/helpers.php` roda em todo comentário antes de salvar
+  (`api/comment.php`) e troca por `*` qualquer trecho que pareça telefone
+  (8 a 13 dígitos seguidos, com ou sem parênteses/traço/espaço) — é uma
+  heurística, então um número de 8 dígitos num outro contexto (ex.: uma
+  data "2024-10-16") também pode ser mascarado; prioriza nunca deixar
+  passar um telefone de verdade.
   Privacidade (`termos.php`, `privacidade.php`), com o horário do aceite
   gravado (`users.terms_accepted_at`). Toda conta pode ser excluída pelo
   próprio usuário na página de Perfil — apaga o registro no banco (perfil,

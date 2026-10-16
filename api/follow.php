@@ -22,5 +22,8 @@ if (!$stmt->fetch()) {
 }
 
 $seguindo = toggle_follow($user['id'], $targetId);
+if ($seguindo) {
+    create_notification($targetId, $user['id'], 'FOLLOW');
+}
 
 json_response(['ok' => true, 'seguindo' => $seguindo]);

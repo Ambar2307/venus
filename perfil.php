@@ -130,15 +130,18 @@ $proximaDataNome = !empty($profile['display_name_changed_at'])
 $qtdSeguindo = count_following($profile['id']);
 $qtdSeguidores = count_followers($profile['id']);
 $qtdVisualizacoes = count_profile_visits($profile['id']);
+$qtdRecomendacoes = count_recommendations($profile['id']);
 
 if ($isOwnProfile && !$previewMode) {
     $minhasFotos = fetch_own_photos($currentUser['id']);
     $meusAmigos = list_friends($currentUser['id']);
     $meusSeguidores = list_followers($currentUser['id']);
     $recomendados = list_recommended_profiles($currentUser);
+    $recomendacoesRecebidas = list_recommenders($currentUser['id']);
     $visitasRecebidas = list_recent_visitors($currentUser['id']);
 } else {
     $seguindo = is_following($currentUser['id'], $profile['id']);
+    $recomendado = is_recommended($currentUser['id'], $profile['id']);
 }
 
 $pageTitle = $profile['display_name'] . ' — Clube do Swing';
@@ -216,6 +219,7 @@ require __DIR__ . '/templates/header.php';
       <div><strong><?= $qtdVisualizacoes ?></strong><span>visualizações</span></div>
       <div><strong><?= $qtdSeguindo ?></strong><span>seguindo</span></div>
       <div><strong><?= $qtdSeguidores ?></strong><span>seguidores</span></div>
+      <div><strong><?= $qtdRecomendacoes ?></strong><span>recomendações</span></div>
     </div>
 
     <div class="profile-meta">
@@ -257,6 +261,14 @@ require __DIR__ . '/templates/header.php';
           data-user-id="<?= e($profile['id']) ?>"
           data-following="<?= $seguindo ? '1' : '0' ?>"
         ><?= $seguindo ? 'Deixar de seguir' : 'Seguir' ?></button>
+
+        <button
+          class="btn btn-outline btn-sm <?= $recomendado ? 'btn-ghost' : '' ?>"
+          data-recommend-btn
+          data-user-id="<?= e($profile['id']) ?>"
+          data-recommended="<?= $recomendado ? '1' : '0' ?>"
+          title="Recomende este perfil publicamente para outros usuários"
+        ><?= $recomendado ? '★ Recomendado' : '☆ Recomendar' ?></button>
       </div>
     <?php endif; ?>
   </div>
@@ -269,6 +281,7 @@ require __DIR__ . '/templates/header.php';
     <button class="tab-btn" data-tab-btn data-tab="meus-amigos">Meus amigos (<?= count($meusAmigos) ?>)</button>
     <button class="tab-btn" data-tab-btn data-tab="meus-seguidores">Meus seguidores (<?= count($meusSeguidores) ?>)</button>
     <button class="tab-btn" data-tab-btn data-tab="recomendados">Recomendados</button>
+    <button class="tab-btn" data-tab-btn data-tab="recomendacoes-recebidas">Recomendações recebidas (<?= count($recomendacoesRecebidas) ?>)</button>
     <button class="tab-btn" data-tab-btn data-tab="visitas">Visitas recebidas (<?= count($visitasRecebidas) ?>)</button>
   </div>
 
@@ -410,6 +423,21 @@ require __DIR__ . '/templates/header.php';
     <?php endforeach; ?>
     <?php if (!$recomendados): ?>
       <div class="friend-row"><span class="text-sm text-muted">Nenhuma recomendação por enquanto.</span></div>
+    <?php endif; ?>
+  </div>
+
+  <div data-tab-panel="recomendacoes-recebidas" class="card" style="display:none">
+    <?php foreach ($recomendacoesRecebidas as $r): ?>
+      <div class="friend-row">
+        <a href="/perfil.php?id=<?= e($r['id']) ?>" class="text-sm">
+          <?= e($r['display_name']) ?>
+          <span class="text-xs text-muted"><?= e(PROFILE_TYPE_LABEL[$r['type']] ?? '') ?></span>
+        </a>
+        <span class="text-xs text-muted">desde <?= e(date('d/m/Y', strtotime($r['created_at']))) ?></span>
+      </div>
+    <?php endforeach; ?>
+    <?php if (!$recomendacoesRecebidas): ?>
+      <div class="friend-row"><span class="text-sm text-muted">Ninguém te recomendou publicamente ainda.</span></div>
     <?php endif; ?>
   </div>
 

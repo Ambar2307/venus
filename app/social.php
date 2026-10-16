@@ -104,6 +104,51 @@ function list_recent_visitors(string $userId, int $limit = 30): array
     return $stmt->fetchAll();
 }
 
+/** True se $recommenderId já recomendou publicamente $recommendedId. */
+function is_recommended(string $recommenderId, string $recommendedId): bool
+{
+    $stmt = db()->prepare('SELECT id FROM recommendations WHERE recommender_id = ? AND recommended_id = ?');
+    $stmt->execute([$recommenderId, $recommendedId]);
+    return (bool)$stmt->fetch();
+}
+
+/** Alterna recomendar/remover recomendação. Retorna o novo estado (true = passou a recomendar). */
+function toggle_recommendation(string $recommenderId, string $recommendedId): bool
+{
+    if (is_recommended($recommenderId, $recommendedId)) {
+        $stmt = db()->prepare('DELETE FROM recommendations WHERE recommender_id = ? AND recommended_id = ?');
+        $stmt->execute([$recommenderId, $recommendedId]);
+        return false;
+    }
+
+    $stmt = db()->prepare('INSERT INTO recommendations (id, recommender_id, recommended_id) VALUES (?, ?, ?)');
+    $stmt->execute([gen_uuid(), $recommenderId, $recommendedId]);
+    return true;
+}
+
+/** Quantas pessoas recomendam publicamente $userId — vira referência no perfil. */
+function count_recommendations(string $userId): int
+{
+    $stmt = db()->prepare('SELECT COUNT(*) FROM recommendations WHERE recommended_id = ?');
+    $stmt->execute([$userId]);
+    return (int)$stmt->fetchColumn();
+}
+
+/** Lista quem recomendou $userId (mais recente primeiro). */
+function list_recommenders(string $userId): array
+{
+    $stmt = db()->prepare(
+        "SELECT u.id, p.display_name, p.type, r.created_at
+         FROM recommendations r
+         JOIN users u ON u.id = r.recommender_id
+         JOIN profiles p ON p.user_id = u.id
+         WHERE r.recommended_id = ?
+         ORDER BY r.created_at DESC"
+    );
+    $stmt->execute([$userId]);
+    return $stmt->fetchAll();
+}
+
 /**
  * Perfis recomendados pra $userId: prioriza mesma cidade, depois mais
  * recentes, excluindo o próprio usuário, amigos já aceitos e quem já segue.

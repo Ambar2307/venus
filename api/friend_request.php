@@ -30,5 +30,6 @@ $stmt = db()->prepare(
     'INSERT INTO friend_requests (id, from_id, to_id, status) VALUES (?, ?, ?, "PENDING")'
 );
 $stmt->execute([gen_uuid(), $user['id'], $toId]);
+create_notification($toId, $user['id'], 'FRIEND_REQUEST');
 
 json_response(['ok' => true]);

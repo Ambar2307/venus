@@ -15,14 +15,31 @@ require __DIR__ . '/templates/header.php';
 
 <div class="card" style="margin-top:1.5rem">
   <?php foreach ($notificacoes as $n): ?>
+    <?php
+      $textos = [
+          'LIKE' => 'curtiu sua foto.',
+          'COMMENT' => 'comentou: "' . e($n['comment_snippet']) . '"',
+          'FOLLOW' => 'começou a seguir você.',
+          'FRIEND_REQUEST' => 'quer ser seu amigo.',
+          'RECOMMEND' => 'recomendou você publicamente. ★',
+      ];
+      $comFoto = in_array($n['type'], ['LIKE', 'COMMENT'], true);
+      $link = $comFoto
+          ? '/ver-foto.php?id=' . e($n['photo_id'])
+          : ($n['type'] === 'FRIEND_REQUEST' ? '/amigos.php' : '/perfil.php?id=' . e($n['actor_id']));
+    ?>
     <div class="friend-row">
       <div style="display:flex;gap:.75rem;align-items:center">
-        <a href="/ver-foto.php?id=<?= e($n['photo_id']) ?>" class="photo-media" style="width:3rem;height:3rem;margin:0;flex-shrink:0;display:block">
-          <img src="/photo.php?id=<?= e($n['photo_id']) ?>" alt="" style="width:100%;height:100%;object-fit:cover">
+        <a href="<?= $link ?>" class="<?= $comFoto ? 'photo-media' : 'avatar' ?>" style="width:3rem;height:3rem;margin:0;flex-shrink:0;display:<?= $comFoto ? 'block' : 'flex' ?>">
+          <?php if ($comFoto): ?>
+            <img src="/photo.php?id=<?= e($n['photo_id']) ?>" alt="" style="width:100%;height:100%;object-fit:cover">
+          <?php else: ?>
+            <?= e(initials($n['actor_name'])) ?>
+          <?php endif; ?>
         </a>
         <div class="text-sm">
           <strong><?= e($n['actor_name']) ?></strong>
-          <?= $n['type'] === 'LIKE' ? 'curtiu sua foto.' : 'comentou: "' . e($n['comment_snippet']) . '"' ?>
+          <?= $textos[$n['type']] ?? '' ?>
           <div class="text-xs text-muted"><?= e(date('d/m/Y H:i', strtotime($n['created_at']))) ?></div>
         </div>
       </div>
