@@ -205,7 +205,23 @@ require __DIR__ . '/templates/header.php';
       <?= csrf_field() ?>
       <input type="hidden" name="publicar_foto" value="1">
       <strong class="text-sm">Publicar foto</strong>
-      <input class="input" type="file" name="photo" accept="image/jpeg,image/png,image/webp" required>
+      <input class="input" type="file" name="photo" accept="image/jpeg,image/png,image/webp" required data-photo-input>
+
+      <div class="photo-adjust" data-photo-adjust hidden>
+        <p class="text-xs text-muted">
+          Essa foto não encaixa direito no quadro do feed. Arraste pra posicionar e
+          use o zoom como preferir — nada é cortado sem você decidir.
+        </p>
+        <div class="photo-adjust-frame">
+          <canvas data-photo-adjust-canvas></canvas>
+        </div>
+        <label class="text-xs text-muted" style="display:flex;align-items:center;gap:.5rem;margin-top:.5rem;max-width:220px">
+          Zoom
+          <input type="range" min="100" max="250" value="100" data-photo-adjust-zoom style="flex:1">
+        </label>
+        <button type="button" class="btn btn-ghost btn-sm" data-photo-adjust-reset style="margin-top:.35rem">Redefinir</button>
+      </div>
+
       <input class="input" type="text" name="caption" placeholder="Legenda (opcional)" maxlength="500">
       <select class="input" name="visibility">
         <option value="PUBLIC">Pública</option>

@@ -87,7 +87,17 @@ templates/                                      → cabeçalho/rodapé HTML reap
   idade calculada, cidade/UF, data de cadastro, data de aceite dos termos,
   quantidade de fotos publicadas e de denúncias recebidas. Esses dados
   continuam sigilosos pra qualquer usuário comum; só aparecem aqui.
-- **LGPD**: cadastro exige aceite explícito de Termos de Uso e Política de
+- **Fotos nunca são cortadas sem escolha do usuário**: `.photo-media` (feed,
+  foto em tela cheia, lista de fotos do perfil, moderação) usa
+  `object-fit: contain` em vez de `cover` — a foto inteira sempre aparece
+  dentro do quadro, com uma faixa neutra preenchendo o espaço que sobrar,
+  nunca cortando nem distorcendo. Além disso, ao publicar uma foto cuja
+  proporção não bate com o quadro do feed (4:5), aparece um ajuste simples
+  (`assets/js/app.js`, bloco "Ajuste de enquadramento") onde o próprio
+  usuário arrasta pra posicionar e usa um controle de zoom antes de
+  publicar; o recorte final é feito no navegador (`<canvas>`) e enviado já
+  pronto, sem precisar de nenhuma biblioteca externa. Fotos que já encaixam
+  na proporção certa pulam esse passo e são enviadas direto.
   Privacidade (`termos.php`, `privacidade.php`), com o horário do aceite
   gravado (`users.terms_accepted_at`). Toda conta pode ser excluída pelo
   próprio usuário na página de Perfil — apaga o registro no banco (perfil,

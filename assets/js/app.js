@@ -459,4 +459,146 @@
       });
     }
   }
+
+  // --- Ajuste de enquadramento ao publicar foto ---
+  // Se a foto escolhida não tiver a proporção do quadro do feed (4:5),
+  // mostra um ajuste onde o usuário arrasta/dá zoom pra escolher o
+  // enquadramento, em vez de deixar o navegador cortar automaticamente.
+  (function () {
+    var TARGET_RATIO = 4 / 5; // igual ao aspect-ratio de .photo-media no CSS
+    var RATIO_TOLERANCE = 0.08;
+    var CANVAS_W = 800;
+    var CANVAS_H = 1000;
+
+    document.querySelectorAll("[data-photo-input]").forEach(function (input) {
+      var form = input.closest("form");
+      var adjustBox = form ? form.querySelector("[data-photo-adjust]") : null;
+      if (!form || !adjustBox) return;
+
+      var canvas = adjustBox.querySelector("[data-photo-adjust-canvas]");
+      var zoomRange = adjustBox.querySelector("[data-photo-adjust-zoom]");
+      var resetBtn = adjustBox.querySelector("[data-photo-adjust-reset]");
+      var ctx = canvas.getContext("2d");
+      canvas.width = CANVAS_W;
+      canvas.height = CANVAS_H;
+
+      var img = null;
+      var baseScale = 1;
+      var scale = 1;
+      var offsetX = 0;
+      var offsetY = 0;
+
+      function clampOffset() {
+        var drawW = img.width * scale;
+        var drawH = img.height * scale;
+        var minX = CANVAS_W - drawW;
+        var minY = CANVAS_H - drawH;
+        offsetX = Math.min(0, Math.max(minX, offsetX));
+        offsetY = Math.min(0, Math.max(minY, offsetY));
+      }
+
+      function draw() {
+        ctx.clearRect(0, 0, CANVAS_W, CANVAS_H);
+        ctx.drawImage(img, offsetX, offsetY, img.width * scale, img.height * scale);
+      }
+
+      function resetView() {
+        baseScale = Math.max(CANVAS_W / img.width, CANVAS_H / img.height);
+        scale = baseScale;
+        offsetX = (CANVAS_W - img.width * scale) / 2;
+        offsetY = (CANVAS_H - img.height * scale) / 2;
+        zoomRange.value = "100";
+        draw();
+      }
+
+      input.addEventListener("change", function () {
+        var file = input.files && input.files[0];
+        img = null;
+        adjustBox.hidden = true;
+        if (!file) return;
+
+        var url = URL.createObjectURL(file);
+        var image = new Image();
+        image.onload = function () {
+          var imgRatio = image.width / image.height;
+          var diff = Math.abs(imgRatio - TARGET_RATIO) / TARGET_RATIO;
+          URL.revokeObjectURL(url);
+          if (diff <= RATIO_TOLERANCE) {
+            return; // já encaixa bem, não precisa de ajuste manual
+          }
+          img = image;
+          resetView();
+          adjustBox.hidden = false;
+        };
+        image.onerror = function () {
+          URL.revokeObjectURL(url);
+        };
+        image.src = url;
+      });
+
+      zoomRange.addEventListener("input", function () {
+        if (!img) return;
+        var pct = parseInt(zoomRange.value, 10) / 100;
+        var cx = CANVAS_W / 2;
+        var cy = CANVAS_H / 2;
+        var imgCx = (cx - offsetX) / scale;
+        var imgCy = (cy - offsetY) / scale;
+        scale = baseScale * pct;
+        offsetX = cx - imgCx * scale;
+        offsetY = cy - imgCy * scale;
+        clampOffset();
+        draw();
+      });
+
+      if (resetBtn) {
+        resetBtn.addEventListener("click", function () {
+          if (img) resetView();
+        });
+      }
+
+      var dragging = false;
+      var lastX = 0;
+      var lastY = 0;
+
+      canvas.addEventListener("pointerdown", function (ev) {
+        if (!img) return;
+        dragging = true;
+        lastX = ev.clientX;
+        lastY = ev.clientY;
+      });
+      window.addEventListener("pointermove", function (ev) {
+        if (!dragging || !img) return;
+        offsetX += ev.clientX - lastX;
+        offsetY += ev.clientY - lastY;
+        lastX = ev.clientX;
+        lastY = ev.clientY;
+        clampOffset();
+        draw();
+      });
+      window.addEventListener("pointerup", function () {
+        dragging = false;
+      });
+
+      form.addEventListener("submit", function (ev) {
+        if (!img || adjustBox.hidden) return; // sem ajuste pendente, envia a foto original
+        ev.preventDefault();
+        canvas.toBlob(
+          function (blob) {
+            if (!blob) {
+              form.submit();
+              return;
+            }
+            var originalName = input.files[0].name.replace(/\.[^.]+$/, "") + ".jpg";
+            var cropped = new File([blob], originalName, { type: "image/jpeg" });
+            var dt = new DataTransfer();
+            dt.items.add(cropped);
+            input.files = dt.files;
+            form.submit();
+          },
+          "image/jpeg",
+          0.9
+        );
+      });
+    });
+  })();
 })();
