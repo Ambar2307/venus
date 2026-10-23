@@ -96,7 +96,7 @@ if ($isOwnProfile && !$previewMode) {
     }
 }
 
-$pageTitle = $profile['display_name'] . ' — Clube do Swing';
+$pageTitle = $profile['display_name'] . ' — Black Fidelidade';
 $activePage = 'perfil';
 require __DIR__ . '/templates/header.php';
 ?>
@@ -122,7 +122,7 @@ require __DIR__ . '/templates/header.php';
     <div style="flex:1">
       <h1 class="font-serif" style="margin-bottom:.25rem"><?= e($profile['display_name']) ?></h1>
       <div class="text-sm text-muted"><?= e($tipo) ?> · Interesse: <?= e($profile['interest'] ?: '—') ?></div>
-      <div class="text-xs text-muted">No Clube do Swing desde <?= e($desde) ?></div>
+      <div class="text-xs text-muted">Na Black Fidelidade desde <?= e($desde) ?></div>
       <?php if ($isOwnProfile && is_exclusive($profile)): ?>
         <span class="badge badge-gold" style="margin-top:.5rem;display:inline-block">Exclusivo</span>
       <?php endif; ?>

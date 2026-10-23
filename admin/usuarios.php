@@ -18,7 +18,7 @@ $stmt = db()->prepare($sql);
 $stmt->execute($params);
 $usuarios = $stmt->fetchAll();
 
-$pageTitle = 'Usuários — Clube do Swing';
+$pageTitle = 'Usuários — Black Fidelidade';
 $activePage = 'moderacao';
 require __DIR__ . '/../templates/header.php';
 ?>

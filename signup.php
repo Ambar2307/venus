@@ -34,7 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-$pageTitle = 'Criar perfil — Clube do Swing';
+$pageTitle = 'Criar perfil — Black Fidelidade';
 $activePage = 'signup';
 require __DIR__ . '/templates/header.php';
 ?>

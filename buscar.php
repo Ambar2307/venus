@@ -53,7 +53,7 @@ if ($temFiltro) {
 $miniaturas = fetch_profile_thumbnails(array_column($resultados, 'id'));
 $seguindoIds = array_column(list_following($currentUser['id']), 'id');
 
-$pageTitle = 'Buscar — Clube do Swing';
+$pageTitle = 'Buscar — Black Fidelidade';
 $activePage = 'buscar';
 require __DIR__ . '/templates/header.php';
 ?>
