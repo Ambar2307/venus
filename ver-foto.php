@@ -26,7 +26,7 @@ if ($foto) {
 
 if (!$foto || !$allowed) {
     http_response_code(404);
-    $pageTitle = 'Foto não encontrada — Black Fidelidade';
+    $pageTitle = 'Foto não encontrada — Clube do Swing';
     require __DIR__ . '/templates/header.php';
     echo '<p class="text-sm text-muted">Foto não encontrada.</p>';
     require __DIR__ . '/templates/footer.php';
@@ -47,7 +47,7 @@ $commentsStmt->execute([$photoId]);
 $comentarios = $commentsStmt->fetchAll();
 
 $tipo = PROFILE_TYPE_LABEL[$foto['type']] ?? '';
-$pageTitle = 'Foto de ' . $foto['display_name'] . ' — Black Fidelidade';
+$pageTitle = 'Foto de ' . $foto['display_name'] . ' — Clube do Swing';
 require __DIR__ . '/templates/header.php';
 ?>
 

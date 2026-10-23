@@ -8,7 +8,7 @@ if (!$currentUser || !in_array($filtro, ['estado', 'seguindo'], true)) {
 }
 $fotos = fetch_feed($currentUser['id'] ?? null, 30, $filtro, $currentUser['state'] ?? null);
 
-$pageTitle = 'Feed — Black Fidelidade';
+$pageTitle = 'Feed — Clube do Swing';
 $activePage = 'feed';
 require __DIR__ . '/templates/header.php';
 ?>

@@ -38,7 +38,7 @@ $stmt = db()->prepare(
 $stmt->execute();
 $denuncias = $stmt->fetchAll();
 
-$pageTitle = 'Moderação — Black Fidelidade';
+$pageTitle = 'Moderação — Clube do Swing';
 $activePage = 'moderacao';
 require __DIR__ . '/../templates/header.php';
 ?>

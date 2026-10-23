@@ -8,7 +8,7 @@ $activePage = $activePage ?? '';
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title><?= e($pageTitle ?? 'Black Fidelidade') ?></title>
+  <title><?= e($pageTitle ?? 'Clube do Swing') ?></title>
   <meta name="csrf-token" content="<?= e(csrf_token()) ?>">
   <link rel="stylesheet" href="/assets/css/style.css">
 </head>
@@ -20,7 +20,7 @@ $activePage = $activePage ?? '';
         <circle cx="10" cy="14" r="8.5" stroke="#a9782f" stroke-width="1.7"/>
         <circle cx="18" cy="14" r="8.5" stroke="#8a3f52" stroke-width="1.7"/>
       </svg>
-      <span>Black Fidelidade</span>
+      <span>Clube do Swing</span>
     </a>
     <nav class="nav-links">
       <a href="/index.php" class="<?= $activePage === 'feed' ? 'active' : '' ?>">Feed</a>

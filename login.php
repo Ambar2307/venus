@@ -20,7 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-$pageTitle = 'Entrar — Black Fidelidade';
+$pageTitle = 'Entrar — Clube do Swing';
 $activePage = 'login';
 require __DIR__ . '/templates/header.php';
 ?>
